@@ -1,0 +1,34 @@
+# Real-time Meeting Assistant Config
+
+# LLM Settings
+llm:
+  provider: "anthropic"  # anthropic, openai
+  model: "claude-3-5-haiku-20241022"
+  api_key: ""  # Set your ANTHROPIC_API_KEY here or use env variable
+
+# Audio Settings
+audio:
+  input_device: null  # null = default microphone, or device index
+  sample_rate: 16000
+  chunk_duration_ms: 100
+
+# Speech-to-Text Settings
+transcription:
+  model: "base"  # base, small, medium, large (larger = more accurate but slower)
+  language: "cs"  # Czech
+
+# UI Settings
+ui:
+  width: 200  # chars per column
+  transcript_color: "white"
+  suggestion_color: "green"
+
+# Hotkey Settings
+hotkey:
+  key_combination: "cmd+shift+h"  # Cmd+Shift+H
+
+# System Settings
+system:
+  context_window_seconds: 30  # How much recent audio to send to LLM
+  llm_timeout_seconds: 3  # Max time to wait for LLM response
+  log_level: "INFO"

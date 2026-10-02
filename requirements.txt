@@ -1,0 +1,23 @@
+# === Menthol (captions build) — Python závislosti ===
+# Instaluje install.sh do venv uvnitř .app bundlu.
+# POZN: Whisper, Google Cloud STT, sounddevice a BlackHole už NEJSOU potřeba —
+# přepis chodí z titulků Google Meetu přes browser extension.
+
+# Menubar app (horní lišta)
+rumps==0.4.0
+
+# Nápověda LLM (Claude) + fallback řetězec
+anthropic==0.117.0
+
+# Gemini a Anthropic REST volání
+requests>=2.31
+
+# POZN: globální hotkey řeší nativní Carbon RegisterEventHotKey (src/hotkey_native.py),
+# pynput už není potřeba (padal v bundlu na HIToolbox/dispatch_assert_queue).
+
+# WS server pro příjem titulků z Meet browser extension
+websockets==17.0.1
+
+# Overlay okno uprostřed obrazovky (AppKit/Quartz/Foundation)
+pyobjc-framework-Cocoa>=10.0
+pyobjc-framework-Quartz>=10.0

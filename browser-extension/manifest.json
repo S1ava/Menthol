@@ -1,0 +1,18 @@
+{
+  "manifest_version": 3,
+  "name": "Menthol — Meet titulky",
+  "version": "1.0",
+  "description": "Posílá živé titulky z Google Meet do lokálního Menthol serveru (ws://localhost:8765).",
+  "permissions": ["alarms"],
+  "host_permissions": ["https://meet.google.com/*"],
+  "background": {
+    "service_worker": "background.js"
+  },
+  "content_scripts": [
+    {
+      "matches": ["https://meet.google.com/*"],
+      "js": ["content.js"],
+      "run_at": "document_idle"
+    }
+  ]
+}

@@ -1,0 +1,86 @@
+{
+  "_note": "Vzorový config. API klíče NEVKLÁDEJ sem — nastav je v appce (menubar → Nastavit klíč), uloží se do macOS Keychain. Tenhle soubor se při prvním spuštění zkopíruje do ~/Library/Application Support/Menthol/config.json.",
+  "api_keys": {
+    "anthropic": "",
+    "gemini": ""
+  },
+  "llm": {
+    "priority": [
+      {"provider": "gemini", "model": "gemini-3.5-flash-lite"},
+      {"provider": "anthropic", "model": "claude-haiku-4-5-20251001"}
+    ]
+  },
+  "internal_speakers": [],
+  "audio": {
+    "input_device": null,
+    "sample_rate": 16000,
+    "chunk_duration_ms": 100,
+    "default_mode": "captions",
+    "modes": {
+      "captions": {
+        "device": null,
+        "speaker": null,
+        "popis": "Google Meet titulky (browser extension, bez audia) — mluvčí se bere přímo z UI",
+        "meet_app": "Brave Browser",
+        "meet_url": "https://meet.google.com/"
+      }
+    }
+  },
+  "transcription": {
+    "provider": "meet_captions",
+    "language": "cs",
+    "google_credentials": null,
+    "captions_port": 8765
+  },
+  "recording": {
+    "enabled": false,
+    "format": "OGG",
+    "output_dir": "~/Documents/Menthol-recordings",
+    "save_transcript": true,
+    "record_my_voice": false
+  },
+  "ui": {
+    "width": 60,
+    "show_interim": true,
+    "interim_lines": 3,
+    "transcript_color": "white",
+    "suggestion_color": "green"
+  },
+  "hotkey": {
+    "key_combination": "cmd+shift+h"
+  },
+  "alerts": {
+    "enabled": true,
+    "priority": [
+      {"provider": "gemini", "model": "gemini-3.5-flash-lite"},
+      {"provider": "anthropic", "model": "claude-sonnet-5"}
+    ],
+    "cooldown_seconds": 20,
+    "notification_type": "overlay",
+    "notification_duration": 3,
+    "notification_sound": false
+  },
+  "default_role": "obchodnik",
+  "roles": {
+    "obchodnik": {
+      "popis": "Seniorní obchodník — radí, jak posunout prodej",
+      "system_prompt": "Jsi zkušený seniorní obchodník a v reálném čase mě koučuješ během obchodního hovoru. Na základě přepisu mi poraď, na co se teď zeptat nebo co říct, abych posunul obchod dál.\n\nPravidla:\n- Odpovídej POUZE konkrétní radou nebo otázkou, žádné vysvětlování ani úvod.\n- Krátce: maximálně 1 krátká věta.\n- Odpovídej česky.\n- Zaměř se na otázky, které odhalí potřeby zákazníka, zpracují námitky, nebo posunou hovor k uzavření."
+    },
+    "kouc": {
+      "popis": "Komunikační kouč — pomáhá vést rozhovor",
+      "system_prompt": "Jsi zkušený leadership pcc kouč a v reálném čase mi radíš během rozhovoru. Na základě přepisu mi poraď, jak reagovat, aby rozhovor byl konstruktivní a druhá strana se cítila vyslyšená.\n\nPravidla:\n- Odpovídej POUZE konkrétní radou nebo otázkou, žádné vysvětlování ani úvod.\n- Krátce: maximálně 1 krátká věta.\n- Odpovídej česky.\n- Zaměř se na tvorbu dohody a uvědomění, aktivní naslouchání, otevřené otázky a jasné formulace."
+    },
+    "pm": {
+      "popis": "Produktový manažer — pomáhá se sběrem požadavků",
+      "system_prompt": "Jsi zkušený produktový manažer a v reálném čase mi radíš během hovoru se zákazníkem nebo týmem. Na základě přepisu mi poraď, na co se zeptat, abych odhalil skutečné potřeby, priority a rizika.\n\nPravidla:\n- Odpovídej POUZE konkrétní radou nebo otázkou, žádné vysvětlování ani úvod.\n- Krátce: maximálně 1 věty.\n- Odpovídej česky.\n- Zaměř se na discovery otázky: problém za požadavkem, dopad, priorita, akceptační kritéria."
+    }
+  },
+  "system": {
+    "context_window_seconds": 5,
+    "suggestion_window_seconds": 30,
+    "silence_rms_threshold": 0.01,
+    "transcription_interval_seconds": 1.0,
+    "llm_timeout_seconds": 6,
+    "log_level": "INFO"
+  }
+}
