@@ -52,7 +52,7 @@ Script se tě na vše zeptá a vysvětlí, proč to chce. Postaví appku do
 ### 4. Spusť Menthol a nastav AI
 1. Finder → **Aplikace** → **Menthol**. Poprvé klikni **pravým → Otevřít →
    Otevřít** (appka není notarizovaná, proto to jednou odklikneš).
-2. V liště přibude **🌿**. Klikni → **Nastavení → AI / nápověda**: vyber Claude
+2. V horní liště přibude **🌿**. Klikni → **Nastavení → AI / nápověda**: vyber Claude
    nebo Gemini a vlož klíč (uloží se do chráněného souboru, ne do repa). Nebo
    zvol **Nic neposílat**.
 3. V **Nastavení → Prohlížeč pro Meet** zvol Brave nebo Chrome (ten, kam jsi
@@ -66,14 +66,14 @@ Menthol **nepotřebuje** Sledování vstupu ani mikrofon. Jediné, co macOS jedn
 
 ## Používání
 
-1. Meet otevři v **normálním okně** Brave/Chrome a zapni **titulky (CC)**.
-2. V liště **🌿 → Spustit poslech** (ikona → 🌿▶).
-3. **Zkratky:**
+1. V horní liště **🌿 → Spustit poslech** (ikona se změní na → 🌿▶).
+2. Měl by se otevřít prohlížeč rovnou na stránce Google meet. Pokud se tak nestalo, Google Meet otevři v **normálním okně** Brave/Chrome a zapni **titulky (CC)**.
+4. **Zkratky:**
    - **Získat radu** (výchozí `cmd+shift+h`) — ukáže nápovědu uprostřed obrazovky.
-   - **Překrýt titulky** — schová/zobrazí titulky na obrazovce (běží dál pro
+   - **Překrýt titulky** (výchozí `cmd+shift+j`) — schová/zobrazí titulky na obrazovce (běží dál pro
      Menthol, jen tě neruší).
-   Obě změníš v **Nastavení → Zkratky**.
-4. Po hovoru se poslech **sám zastaví** (když zavěsíš / zavřeš tab), nebo ručně
+   Obě zkratky změníš v **Nastavení → Zkratky**.
+5. Po ukončení hovoru se poslech **sám zastaví** za 15 sekund (když zavěsíš / zavřeš tab), nebo ručně
    **🌿 → Zastavit poslech**.
 
 Přepis se ukládá jako `meet_<datum_čas>_<název_schůzky>.txt` do
@@ -83,7 +83,7 @@ Přepis se ukládá jako `meet_<datum_čas>_<název_schůzky>.txt` do
 
 ## Když to nepřepisuje
 1. **Titulky (CC) nejsou zapnuté** v Meetu.
-2. **Meet běží v jiném profilu**, než kam jsi načetl rozšíření (rozšíření jsou
+2. **Meet běží v jiném profilu**, než kam jsi načetl Chrome/Brave rozšíření (rozšíření jsou
    per-profil), nebo v tabu otevřeném dřív než rozšíření → dej **Cmd+R**.
 3. **Safari / samostatná Meet.app** — tam rozšíření neběží, použij normální okno
    Brave/Chrome.
