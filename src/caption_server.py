@@ -15,6 +15,11 @@ import websockets
 
 DEBUG = False
 
+# Handshake marker. Spolu s Origin checkem je to defense-in-depth: odmítne
+# náhodné/jiné lokální klienty i spojení bez rozšíření. (Není to silná autentizace
+# — kód je veřejný; hlavní ochranou proti webstránkám je Origin check.)
+PROTO = "menthol1"
+
 
 class MeetCaptionsTranscriber:
     """WS server naslouchající browser extension místo přepisu audia."""
@@ -109,8 +114,24 @@ class MeetCaptionsTranscriber:
             print(f"[MEET-CAP] Odmítnuto spojení z cizího originu: {origin}")
             await websocket.close()
             return
-        print("[MEET-CAP] Extension připojena")
         self._clients.add(websocket)
+        # Handshake: první zpráva musí být hello se správným proto, jinak zavři.
+        try:
+            first = await asyncio.wait_for(websocket.recv(), timeout=5)
+            hello = json.loads(first)
+            if hello.get("type") != "hello" or hello.get("proto") != PROTO:
+                print("[MEET-CAP] Neplatný handshake — zavírám spojení")
+                await websocket.close()
+                self._clients.discard(websocket)
+                return
+        except Exception:
+            self._clients.discard(websocket)
+            try:
+                await websocket.close()
+            except Exception:
+                pass
+            return
+        print("[MEET-CAP] Extension připojena")
         try:
             async for raw in websocket:
                 try:

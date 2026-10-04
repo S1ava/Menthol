@@ -25,6 +25,8 @@ function connect() {
     ws.onopen = () => {
       console.log("[Menthol] WS připojen");
       clearTimeout(reconnectTimer);
+      // Handshake jako první zpráva (server bez něj spojení zavře).
+      try { ws.send(JSON.stringify({ type: "hello", proto: "menthol1" })); } catch (e) { /* noop */ }
       flushQueue();
     };
     ws.onmessage = (ev) => {

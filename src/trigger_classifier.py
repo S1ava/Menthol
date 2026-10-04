@@ -167,11 +167,10 @@ class TriggerClassifier:
         safe_note = note.replace("\n", " ").strip()
         if not safe_note:
             safe_note = "Něco se děje — mrkni na hovor."
-
-        if self.notification_type == "osascript":
-            self._notify_osascript(safe_note)
-        else:
-            self._notify_overlay(safe_note)
+        # Vždy vlastní overlay. (Dřívější 'osascript' cesta sestavovala
+        # AppleScript z textu přepisu = neověřený vstup; odstraněno kvůli
+        # bezpečnosti. Overlay je navíc lepší UX.)
+        self._notify_overlay(safe_note)
 
     def _notify_overlay(self, safe_note: str):
         """Vlastní floating overlay uprostřed obrazovky místo systémové
@@ -197,16 +196,3 @@ class TriggerClassifier:
             if DEBUG:
                 print(f"[TRIGGER] Notifikace selhala: {e}")
 
-    def _notify_osascript(self, safe_note: str):
-        """Klasická systémová notifikace macOS (vpravo nahoře)."""
-        # Odstraň uvozovky — brání útěku z AppleScript řetězce (transcript
-        # je z hovoru, tedy fakticky externí neověřený vstup).
-        escaped = safe_note.replace('"', "'")
-        script = f'display notification "{escaped}" with title "🌿 Menthol upozornění"'
-        if self.sound:
-            script += ' sound name "Glass"'
-        try:
-            subprocess.run(["osascript", "-e", script], check=False)
-        except Exception as e:
-            if DEBUG:
-                print(f"[TRIGGER] Notifikace selhala: {e}")

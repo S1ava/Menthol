@@ -393,7 +393,7 @@ class RealtimeAssistant:
             )
 
         # Transparency: odkaz ke stažení + zda posílat chat-notice do Meetu.
-        self._download_url = self.config.get("download_url", "https://github.com/S1ava/Menthol")
+        self._download_url = self.config.get("download_url", "https://github.com/S1ava/Menthol/releases/latest")
         self._chat_notice_on = bool(
             (self.config.get("transparency", {}) or {}).get("chat_notice", True)
         )
