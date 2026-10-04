@@ -1,0 +1,23 @@
+Menthol — Proprietary License
+Copyright (c) 2026 Advantiq s.r.o. / Jaroslav "Sláva" Mrvka. All rights reserved.
+
+Tento software ("Menthol") je zdrojově dostupný, NE open-source.
+
+CO SMÍŠ:
+- Stáhnout si Menthol a používat ho pro vlastní osobní potřebu.
+- Přečíst si zdrojový kód a nahlásit bezpečnostní či jiné chyby autorovi.
+- Navrhnout úpravy formou pull requestu autorovi.
+
+CO NESMÍŠ bez výslovného písemného souhlasu autora:
+- Kopírovat, šířit, publikovat nebo přeprodávat tento kód ani jeho části.
+- Upravovat ho a šířit upravené verze.
+- Používat ho komerčně nebo jako součást jiného produktu či služby.
+- Odstranit nebo obejít oznámení o přepisu ("transparency notice"), které
+  Menthol odesílá do chatu schůzky, ani jakékoli odkazy/atribuce autora.
+
+Software je poskytován "tak jak je", bez jakékoli záruky. Autor neodpovídá za
+žádné škody vzniklé jeho použitím. Menthol čte titulky Google Meet a (pokud to
+nevypneš v Nastavení → AI → "Nic neposílat") posílá text přepisu do zvolené
+LLM služby (Anthropic/Google) pod tvým vlastním API klíčem.
+
+Licencování nad rámec výše uvedeného: https://advantiq.cz

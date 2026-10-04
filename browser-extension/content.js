@@ -127,16 +127,64 @@
   let hideCC = true;
   try { hideCC = localStorage.getItem("menthol_hide_cc") !== "0"; } catch (e) { /* noop */ }
   applyHideCC(hideCC);
-  console.log("[Menthol] Titulky na obrazovce:", hideCC ? "SKRYTÉ" : "viditelné",
-              "— přepnout Alt+Shift+C");
-  window.addEventListener("keydown", (e) => {
-    if (e.altKey && e.shiftKey && (e.code === "KeyC" || (e.key || "").toLowerCase() === "c")) {
-      hideCC = !hideCC;
-      try { localStorage.setItem("menthol_hide_cc", hideCC ? "1" : "0"); } catch (e2) { /* noop */ }
-      applyHideCC(hideCC);
-      console.log("[Menthol] Titulky na obrazovce:", hideCC ? "SKRYTÉ" : "viditelné");
+  console.log("[Menthol] Titulky na obrazovce:", hideCC ? "SKRYTÉ" : "viditelné");
+  function toggleCC() {
+    hideCC = !hideCC;
+    try { localStorage.setItem("menthol_hide_cc", hideCC ? "1" : "0"); } catch (e) { /* noop */ }
+    applyHideCC(hideCC);
+    console.log("[Menthol] Titulky na obrazovce:", hideCC ? "SKRYTÉ" : "viditelné");
+  }
+
+  // Příkazy z appky (přes background): globální zkratka na titulky + chat-notice.
+  chrome.runtime.onMessage.addListener((msg) => {
+    if (!msg || !msg.cmd) return;
+    if (msg.cmd === "toggle_cc") toggleCC();
+    else if (msg.cmd === "chat_notice") postChatMessage(msg.text || "");
+  });
+
+  // Napíše zprávu do chatu Meetu (transparentní oznámení o přepisu).
+  // Meet UI je křehké (hashované třídy), tak hledáme přes aria-label/ikony.
+  function postChatMessage(text) {
+    if (!text) return;
+    function setNativeValue(el, value) {
+      const d = Object.getOwnPropertyDescriptor(Object.getPrototypeOf(el), "value");
+      if (d && d.set) d.set.call(el, value); else el.value = value;
     }
-  }, true);
+    function findChatInput() {
+      return document.querySelector(
+        'textarea[aria-label*="essage" i], textarea[aria-label*="práv" i], textarea[placeholder]'
+      );
+    }
+    function openChat() {
+      const btn = [...document.querySelectorAll("button[aria-label]")].find((b) =>
+        /chat|zpráv/i.test(b.getAttribute("aria-label") || "")
+      );
+      if (btn) btn.click();
+    }
+    if (!findChatInput()) openChat();
+    let tries = 0;
+    const timer = setInterval(() => {
+      tries++;
+      const inp = findChatInput();
+      if (inp) {
+        clearInterval(timer);
+        inp.focus();
+        setNativeValue(inp, text);
+        inp.dispatchEvent(new Event("input", { bubbles: true }));
+        inp.dispatchEvent(new KeyboardEvent("keydown", {
+          key: "Enter", code: "Enter", keyCode: 13, which: 13, bubbles: true,
+        }));
+        const send = [...document.querySelectorAll("button[aria-label]")].find((b) =>
+          /send|odeslat/i.test(b.getAttribute("aria-label") || "")
+        );
+        if (send) send.click();
+        console.log("[Menthol] chat-notice odeslán");
+      } else if (tries > 20) {
+        clearInterval(timer);
+        console.warn("[Menthol] chat input nenalezen — notice neodeslán");
+      }
+    }, 300);
+  }
 
   // Heartbeat + metadata: každých 5 s (jen když jsme v konkrétním meetingu)
   // pošle titulek + kód meetingu. Server z toho pojmenuje soubor a zároveň to
@@ -201,7 +249,10 @@
       console.log("[Menthol] hovor ukončen (call_end zmizel) → stop heartbeat");
       return;
     }
-    const name = meetingName() || document.title;
+    // document.title je nejspolehlivější: u pojmenované schůzky "Meet – <název>"
+    // (appka si "Meet – " odřízne), u nepojmenované "Meet – <kód>" → fallback na
+    // kód. Screen-scrape (meetingName) chytal špatně vlastní dlaždici, proto pryč.
+    const name = document.title;
     console.log("[Menthol] meta SEND — code:", code, "name:", name);
     try {
       chrome.runtime.sendMessage(

@@ -1,109 +1,117 @@
 # 🌿 Menthol
 
-Realtime našeptávač do hovoru. Čte živé titulky Google Meetu a na stisk
-**Cmd+Shift+H** ti uprostřed obrazovky ukáže, na co se zeptat nebo co říct.
-Overlay vidíš jen ty, ve sdílení obrazovky se nezobrazuje.
+Realtime našeptávač do hovoru pro macOS. Čte živé titulky Google Meetu a na
+stisk klávesové zkratky ti uprostřed obrazovky ukáže, na co se zeptat nebo co
+říct. Overlay vidíš jen ty, ve sdílení obrazovky se nezobrazuje.
 
-Běží jako appka v horní liště macOS. Přepis bere z titulků Meetu, takže
-nepotřebuje mikrofon, žádný audio driver ani placené přepisové služby.
+Běží jako appka v horní liště. Přepis bere z titulků Meetu, takže nepotřebuje
+mikrofon, žádný audio driver ani žádné macOS oprávnění navíc.
+
+> **Transparentnost:** Ve free verzi Menthol při začátku přepisu automaticky
+> napíše do chatu schůzky krátkou zprávu, že probíhá přepis (s odkazem, kde si
+> Menthol stáhnout). Účastníci tak vždy vědí, že se přepisuje.
 
 ---
 
 ## Co potřebuješ (jednou)
 
 1. **Mac** s macOS 12 nebo novějším.
-2. **Brave** nebo **Google Chrome**.
-3. **Python 3** (na Macu často už je). Když není, nainstaluj z
-   <https://www.python.org/downloads/> nebo `brew install python`.
-4. **Anthropic API klíč** (placené API Claude). Získáš na
-   <https://console.anthropic.com> → *API Keys*. Gemini klíč je volitelný.
+2. **Brave** nebo **Google Chrome** (titulky čte rozšíření, které běží jen v
+   těchto prohlížečích — Safari ani samostatná „Meet.app" nefungují).
+3. **Python 3** (na Macu často už je; jinak `brew install python` nebo
+   z <https://www.python.org/downloads/>).
+4. **API klíč** pro AI nápovědu — Anthropic (Claude) nebo Google (Gemini).
+   Anthropic: <https://console.anthropic.com> → API Keys.
+   **Nebo vůbec žádný** — v Nastavení lze zvolit „Nic neposílat": Menthol pak
+   jen ukládá přepis a nic nikam neodesílá (bez nápovědy).
 
 ---
 
 ## Instalace krok za krokem
 
 ### 1. Stáhni projekt
-Buď přes Git:
 ```bash
-git clone <adresa-repozitáře> menthol
-cd menthol
+git clone https://github.com/S1ava/Menthol.git
+cd Menthol
 ```
-nebo si stáhni ZIP z GitHubu (tlačítko **Code → Download ZIP**), rozbal, a v
-Terminálu se do složky přesuň (`cd` a přetáhni složku do okna Terminálu).
+Nebo ZIP: **Code → Download ZIP**, rozbal, a v Terminálu se do složky přesuň.
 
 ### 2. Spusť instalaci
 ```bash
 ./install.sh
 ```
-Script postaví appku do `~/Applications/Menthol.app` (bez hesla, bez sudo).
-Chvíli to trvá, stahují se knihovny. Až doběhne, vypíše další kroky.
+Script se tě na vše zeptá a vysvětlí, proč to chce. Postaví appku do
+`~/Applications/Menthol.app` (nebo `/Applications`). Nepotřebuje sudo.
 
-### 3. Načti browser extension (ta čte titulky)
-1. V prohlížeči otevři `brave://extensions` (nebo `chrome://extensions`).
-2. Vpravo nahoře zapni **Vývojářský režim / Developer mode**.
-3. Klikni **Načíst rozbalené / Load unpacked** a vyber složku
-   **`browser-extension`** uvnitř staženého projektu.
-4. Nechej ji zapnutou.
+### 3. Načti rozšíření do prohlížeče (čte titulky)
+1. V Brave/Chrome otevři `brave://extensions` (resp. `chrome://extensions`).
+2. **Pro profil, ve kterém děláš schůzky** (pozor: rozšíření jsou per-profil).
+3. Vpravo nahoře zapni **Vývojářský režim / Developer mode**.
+4. **Načíst rozbalené / Load unpacked** → vyber složku **`browser-extension`**.
 
-> ⚠️ **Důležité:** Meet musí běžet v **normálním okně** prohlížeče. Samostatná
-> „appka" (PWA zkratka) titulky nepředá.
+### 4. Spusť Menthol a nastav AI
+1. Finder → **Aplikace** → **Menthol**. Poprvé klikni **pravým → Otevřít →
+   Otevřít** (appka není notarizovaná, proto to jednou odklikneš).
+2. V liště přibude **🌿**. Klikni → **Nastavení → AI / nápověda**: vyber Claude
+   nebo Gemini a vlož klíč (uloží se do chráněného souboru, ne do repa). Nebo
+   zvol **Nic neposílat**.
+3. V **Nastavení → Prohlížeč pro Meet** zvol Brave nebo Chrome (ten, kam jsi
+   načetl rozšíření).
 
-### 4. Spusť Menthol a nastav klíč
-1. Finder → **Aplikace** (nebo `~/Applications`, pokud instalace neměla práva do
-   systémových Aplikací) → **Menthol**. Kdyby macOS hlásil neznámého vývojáře:
-   klikni na appku **pravým tlačítkem → Otevřít → Otevřít**. (Appka není
-   notarizovaná, proto to jednou odklikneš.)
-2. Menthol běží **jen v horní liště**, ne v Docku. Objeví se **🌿**. Klikni na něj
-   → **Nastavit Anthropic klíč…** a vlož svůj klíč. Uloží se do chráněného
-   souboru (`secrets.json`, práva jen pro tvůj účet), ne do repozitáře.
-
-### 5. (Volitelně) změň klávesovou zkratku
-Výchozí je **Cmd+Shift+H**. Změníš ji v **🌿 → Zkratka: … (změnit…)**.
-Žádné systémové oprávnění není potřeba (hotkey je nativní macOS registrace).
-Vyhni se běžným zkratkám jako Cmd+C/X/V — Menthol je „spotřebuje".
+### Oprávnění
+Menthol **nepotřebuje** Sledování vstupu ani mikrofon. Jediné, co macOS jednou
+řeší, je Gatekeeper (to „Otevřít" pravým tlačítkem v kroku 4).
 
 ---
 
 ## Používání
 
-1. Otevři Google Meet v normálním okně prohlížeče a **zapni titulky (CC)**.
-2. V liště klikni na **🌿 → Spustit poslech**. Ikona se změní na **🌿▶**.
-3. Během hovoru mačkej **Cmd+Shift+H** — nápověda se ukáže uprostřed obrazovky.
-4. **Role rádce** (obchodník / kouč / produkťák) přepneš v menu 🌿.
-5. Po hovoru **🌿 → Zastavit poslech**.
+1. Meet otevři v **normálním okně** Brave/Chrome a zapni **titulky (CC)**.
+2. V liště **🌿 → Spustit poslech** (ikona → 🌿▶).
+3. **Zkratky:**
+   - **Získat radu** (výchozí `cmd+shift+h`) — ukáže nápovědu uprostřed obrazovky.
+   - **Překrýt titulky** — schová/zobrazí titulky na obrazovce (běží dál pro
+     Menthol, jen tě neruší).
+   Obě změníš v **Nastavení → Zkratky**.
+4. Po hovoru se poslech **sám zastaví** (když zavěsíš / zavřeš tab), nebo ručně
+   **🌿 → Zastavit poslech**.
 
-Menthol umí i sám upozornit, když se v hovoru děje něco, na co reagovat
-(overlay se zprávou). Zapíná se v configu (`alerts`).
+Přepis se ukládá jako `meet_<datum_čas>_<název_schůzky>.txt` do
+`~/Documents/Menthol-recordings/` (složku změníš v Nastavení → Přepisy).
 
 ---
 
 ## Když to nepřepisuje
-
-Nejčastější příčiny, v tomhle pořadí:
-1. **Titulky (CC) nejsou v Meetu zapnuté.** Menthol jen čte titulky z obrazovky.
-2. **Meet běží v PWA „app" okně**, ne v normálním okně prohlížeče. Otevři ho
-   přes 🌿 → *Otevřít Google Meet*, nebo běžnou záložku.
-3. **Extension není načtená / je vypnutá.** Zkontroluj `brave://extensions`.
-4. Log appky je v `~/Library/Logs/Menthol/menthol.log` — pošli ho, když nic
-   z výše uvedeného nepomůže.
+1. **Titulky (CC) nejsou zapnuté** v Meetu.
+2. **Meet běží v jiném profilu**, než kam jsi načetl rozšíření (rozšíření jsou
+   per-profil), nebo v tabu otevřeném dřív než rozšíření → dej **Cmd+R**.
+3. **Safari / samostatná Meet.app** — tam rozšíření neběží, použij normální okno
+   Brave/Chrome.
+4. Log: `~/Library/Logs/Menthol/menthol.log`.
 
 ---
 
 ## Odinstalace
-- Smaž `~/Applications/Menthol.app`.
-- Volitelně nastavení a klíče: `~/Library/Application Support/Menthol/`
-  (`config.json`, `secrets.json`), log `~/Library/Logs/Menthol/` a přepisy
-  `~/Documents/Menthol-recordings/`.
-- Extension odeber na `brave://extensions`.
+- Smaž `Menthol.app` z Aplikací.
+- Nastavení a klíče: `~/Library/Application Support/Menthol/`.
+- Přepisy: `~/Documents/Menthol-recordings/`.
+- Rozšíření odeber na `brave://extensions`.
 
 ---
 
-## Poznámky
-- Klíče leží v `~/Library/Application Support/Menthol/secrets.json` (práva 0600,
-  jen tvůj účet), nikdy ne v repozitáři ani v bundlu appky.
-- Appka není podepsaná placeným Apple certifikátem. Po **updatu** může macOS
-  chtít znovu povolit *Sledování vstupu* — to je daň za bezplatnou distribuci.
-- Přepis každého hovoru se ukládá jako `meet_<datum_čas>_<název_meetingu>.txt`
-  do `~/Documents/Menthol-recordings/` (výchozí). Složku změníš v
-  **🌿 → Změnit složku přepisů…**, otevřeš v **🌿 → Otevřít složku přepisů**.
-  Ukládání jde vypnout v configu (`recording.save_transcript`).
+## Soukromí
+- API klíče jsou v chráněném souboru jen pro tvůj účet, nikdy ne v repu.
+- V režimu Claude/Gemini se text přepisu posílá do zvolené LLM služby pod tvým
+  klíčem. V režimu **„Nic neposílat"** neodchází nikam nic.
+
+## Licence
+Zdrojově dostupné, **ne open-source**. Viz [LICENSE](LICENSE). Kopírování,
+úpravy a šíření bez souhlasu autora nejsou povoleny.
+
+---
+
+Vyvinul **[Advantiq](https://advantiq.cz)** — externí projektové řízení a vývoj
+řešení na míru. Když ti Menthol šetří čas, můžeš podpořit vývoj na
+[GitHub Sponsors](https://github.com/sponsors/S1ava). ☕
+
+🌿 **[advantiq.cz](https://advantiq.cz)**

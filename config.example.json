@@ -4,6 +4,10 @@
     "anthropic": "",
     "gemini": ""
   },
+  "ai": {
+    "_mode_options": ["anthropic", "gemini", "none"],
+    "mode": "anthropic"
+  },
   "llm": {
     "priority": [
       {"provider": "gemini", "model": "gemini-3.5-flash-lite"},
@@ -21,6 +25,7 @@
         "device": null,
         "speaker": null,
         "popis": "Google Meet titulky (browser extension, bez audia) — mluvčí se bere přímo z UI",
+        "_meet_app_options": "'Brave Browser' | 'Google Chrome' (jen Chromium prohlížeče, kde běží rozšíření)",
         "meet_app": "Brave Browser",
         "meet_url": "https://meet.google.com/"
       }
@@ -37,6 +42,7 @@
     "format": "OGG",
     "output_dir": "~/Documents/Menthol-recordings",
     "save_transcript": true,
+    "open_folder_after": false,
     "record_my_voice": false
   },
   "ui": {
@@ -47,7 +53,12 @@
     "suggestion_color": "green"
   },
   "hotkey": {
-    "key_combination": "cmd+shift+h"
+    "key_combination": "cmd+shift+h",
+    "captions_toggle": "cmd+shift+j"
+  },
+  "download_url": "https://github.com/S1ava/Menthol",
+  "transparency": {
+    "chat_notice": true
   },
   "alerts": {
     "enabled": true,

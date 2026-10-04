@@ -312,56 +312,92 @@ class RealtimeAssistant:
                 print(f"⚠️ Ukládání přepisu vypnuto: {e}")
 
         api_keys = self.config.get("api_keys", {})
+        # AI režim: 'anthropic' | 'gemini' | 'none'. 'none' = nic neposílat ven,
+        # žádná nápověda ani upozornění, jen lokální přepis.
+        self.ai_mode = (self.config.get("ai", {}) or {}).get("mode", "anthropic")
+        DEFAULT_MODELS = {
+            "anthropic": "claude-haiku-4-5-20251001",
+            "gemini": "gemini-3.5-flash-lite",
+        }
 
         def build_chain(priority: list) -> list:
+            if self.ai_mode == "none":
+                return []
+            # Vyber jen providera zvoleného v AI režimu; když chybí v chainu,
+            # doplň výchozí model.
+            entries = [e for e in priority if e.get("provider") == self.ai_mode]
+            if not entries:
+                entries = [{"provider": self.ai_mode, "model": DEFAULT_MODELS.get(self.ai_mode)}]
             return [
                 {
-                    "provider": entry["provider"],
-                    "model": entry["model"],
-                    "api_key": api_keys.get(entry["provider"]),
+                    "provider": e["provider"],
+                    "model": e["model"],
+                    "api_key": api_keys.get(e["provider"]),
                 }
-                for entry in priority
+                for e in entries
             ]
 
-        llm_chain = build_chain(self.config["llm"]["priority"])
-
-        try:
-            self.llm = LLMHandler(
-                providers=llm_chain,
-                timeout_seconds=self.config["system"]["llm_timeout_seconds"],
-                system_prompt=role_cfg.get("system_prompt"),
-            )
-        except ValueError as e:
-            print(f"Error: {e}")
-            sys.exit(1)
+        self.llm = None
+        if self.ai_mode == "none":
+            print("🔒 AI režim: nic neposílat — nápověda i upozornění vypnuty")
+        else:
+            try:
+                self.llm = LLMHandler(
+                    providers=build_chain(self.config["llm"]["priority"]),
+                    timeout_seconds=self.config["system"]["llm_timeout_seconds"],
+                    system_prompt=role_cfg.get("system_prompt"),
+                )
+            except ValueError as e:
+                print(f"⚠️ Nápověda vypnutá: {e}")
+                self.llm = None
 
         # Proaktivní upozornění (volitelné) — klasifikuje každou finální větu
-        # na pozadí a při triggeru pošle macOS notifikaci.
+        # na pozadí a při triggeru pošle macOS notifikaci. V režimu 'none' vypnuto.
         self.trigger_classifier = None
         alerts_cfg = self.config.get("alerts", {})
-        if alerts_cfg.get("enabled"):
+        if self.ai_mode != "none" and alerts_cfg.get("enabled"):
             alerts_chain = build_chain(alerts_cfg.get("priority", self.config["llm"]["priority"]))
-            self.trigger_classifier = TriggerClassifier(
-                providers=alerts_chain,
-                cooldown_seconds=alerts_cfg.get("cooldown_seconds", 20),
-                sound=alerts_cfg.get("notification_sound", False),
-                overlay_duration=alerts_cfg.get("notification_duration", 3),
-                notification_type=alerts_cfg.get("notification_type", "overlay"),
-                overlay_func=self.overlay_func,
-            )
-            chain_desc = " → ".join(f"{e['provider']}/{e['model']}" for e in alerts_chain)
-            print(
-                f"🔔 Upozornění zapnutá — {chain_desc} "
-                f"(cooldown {alerts_cfg.get('cooldown_seconds', 20)}s)"
-            )
+            try:
+                self.trigger_classifier = TriggerClassifier(
+                    providers=alerts_chain,
+                    cooldown_seconds=alerts_cfg.get("cooldown_seconds", 20),
+                    sound=alerts_cfg.get("notification_sound", False),
+                    overlay_duration=alerts_cfg.get("notification_duration", 3),
+                    notification_type=alerts_cfg.get("notification_type", "overlay"),
+                    overlay_func=self.overlay_func,
+                )
+                chain_desc = " → ".join(f"{e['provider']}/{e['model']}" for e in alerts_chain)
+                print(
+                    f"🔔 Upozornění zapnutá — {chain_desc} "
+                    f"(cooldown {alerts_cfg.get('cooldown_seconds', 20)}s)"
+                )
+            except ValueError as e:
+                print(f"⚠️ Upozornění vypnutá: {e}")
+                self.trigger_classifier = None
 
-        # Hotkey listener — nativní Carbon (bez pynputu, bez Input Monitoring).
+        # Hotkey listenery — nativní Carbon (bez pynputu, bez Input Monitoring).
+        # Dvě zkratky: získat radu + překrýt titulky.
         print("⏳ Načítám hotkey (Carbon)…")
         from src.hotkey_native import HotkeyListener
+        hk_cfg = self.config.get("hotkey", {})
         self.hotkey = HotkeyListener(
-            key_combination=self.config["hotkey"]["key_combination"],
+            key_combination=hk_cfg.get("key_combination", "cmd+shift+h"),
             callback=self.on_hotkey_pressed,
         )
+        self.hotkey_cc = None
+        cc_combo = hk_cfg.get("captions_toggle")
+        if cc_combo:
+            self.hotkey_cc = HotkeyListener(
+                key_combination=cc_combo,
+                callback=self.toggle_captions,
+            )
+
+        # Transparency: odkaz ke stažení + zda posílat chat-notice do Meetu.
+        self._download_url = self.config.get("download_url", "https://github.com/S1ava/Menthol")
+        self._chat_notice_on = bool(
+            (self.config.get("transparency", {}) or {}).get("chat_notice", True)
+        )
+        self._chat_notice_sent = False
 
         # State
         self._last_transcript = ""
@@ -379,6 +415,11 @@ class RealtimeAssistant:
     def on_hotkey_pressed(self):
         """Called when hotkey is pressed."""
         print("\n🔔 HOTKEY PRESSED!")
+        if not self.llm:
+            print("ℹ️ Nápověda vypnutá (AI režim: nic neposílat)")
+            if self.on_suggestion:
+                self.on_suggestion("Nápověda je vypnutá (AI: nic neposílat).")
+            return
         if self._getting_suggestion:
             print("⚠️ Already processing suggestion, skipping")
             return  # Already processing
@@ -451,6 +492,29 @@ class RealtimeAssistant:
             print(f"{cyan}│{reset} {highlight}{line}{reset}{pad} {cyan}│{reset}")
         print(bottom + "\n")
 
+    def toggle_captions(self):
+        """Zkratka 'překrýt titulky' → řekni extension, ať titulky schová/ukáže."""
+        try:
+            self.transcriber.send({"cmd": "toggle_cc"})
+            print("🙈 Přepínám viditelnost titulků v Meetu")
+        except Exception as e:
+            print(f"[CC] toggle selhal: {e}")
+
+    def _maybe_send_chat_notice(self):
+        """Při prvním přepisu pošli do chatu Meetu transparentní oznámení."""
+        if self._chat_notice_sent or not self._chat_notice_on:
+            return
+        self._chat_notice_sent = True
+        text = (
+            "Guys, I am about to transcribe this meeting with Menthol: "
+            f"{self._download_url}"
+        )
+        try:
+            self.transcriber.send({"cmd": "chat_notice", "text": text})
+            print("📣 Odesílám transparentní oznámení do chatu Meetu")
+        except Exception as e:
+            print(f"[NOTICE] odeslání selhalo: {e}")
+
     def _on_meta(self, title: str, code: str = None):
         """Callback z extension: název meetingu (titulek tabu) + kód z URL.
         Titulek má přednost; když z něj po očištění nic nezbude, použije se kód."""
@@ -470,6 +534,8 @@ class RealtimeAssistant:
         speaker: přebije self.speaker, když ho pošle zdroj sám (titulky Meet
         posílají jméno mluvčího přímo z UI — přesnější než statický config).
         """
+        # První přepis = pošli transparentní oznámení do chatu Meetu.
+        self._maybe_send_chat_notice()
         effective_speaker = speaker if speaker is not None else self.speaker
         # Jméno mluvčího jde i do přepisu pro LLM — jinak model neví, kdo co
         # řekl, a v captions módu s víc mluvčími si domýšlí, že mluví klient.
@@ -600,8 +666,11 @@ class RealtimeAssistant:
         smyčky. Vhodné pro běh pod cizím runloopem (menubar app). CLI použije
         run(), který navíc nainstaluje signal handlery a blokuje do Ctrl+C."""
         print("🌿 Menthol — spouštím...")
-        llm_chain_desc = " → ".join(f"{e['provider']}/{e['model']}" for e in self.llm.providers)
-        print(f"💡 Model pro nápovědu (hotkey): {llm_chain_desc}")
+        if self.llm:
+            llm_chain_desc = " → ".join(f"{e['provider']}/{e['model']}" for e in self.llm.providers)
+            print(f"💡 Model pro nápovědu (hotkey): {llm_chain_desc}")
+        else:
+            print("🔒 Nápověda vypnutá (AI režim: nic neposílat)")
 
         self._is_running = True
         self._stop_event.clear()
@@ -629,8 +698,10 @@ class RealtimeAssistant:
             self.audio.start()
             print("✓ Audio capture started")
 
-        # Start hotkey listener
+        # Start hotkey listenery (rada + překrýt titulky)
         self.hotkey.start()
+        if self.hotkey_cc:
+            self.hotkey_cc.start()
 
         # Nahrávání hovoru (vlastní odběr proudu)
         if self.recorder:
@@ -688,6 +759,8 @@ class RealtimeAssistant:
         # Pořadí: nejdřív odstřihni zdroje událostí, pak dopiš soubory
         try:
             self.hotkey.stop()
+            if self.hotkey_cc:
+                self.hotkey_cc.stop()
         except Exception:
             pass
 

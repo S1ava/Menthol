@@ -27,6 +27,16 @@ function connect() {
       clearTimeout(reconnectTimer);
       flushQueue();
     };
+    ws.onmessage = (ev) => {
+      // Příkaz z appky (app → extension): přepošli do Meet tabů (content.js).
+      let cmd;
+      try { cmd = JSON.parse(ev.data); } catch (e) { return; }
+      chrome.tabs.query({ url: "*://meet.google.com/*" }, (tabs) => {
+        for (const t of tabs) {
+          chrome.tabs.sendMessage(t.id, cmd, () => { void chrome.runtime.lastError; });
+        }
+      });
+    };
     ws.onclose = () => {
       ws = null;
       scheduleReconnect();

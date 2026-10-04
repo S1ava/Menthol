@@ -41,6 +41,26 @@ class MeetCaptionsTranscriber:
         self._thread: Optional[threading.Thread] = None
         self._stop_event: Optional[asyncio.Event] = None
         self._running = False
+        self._clients = set()  # připojené sockety (pro posílání app→extension)
+
+    def send(self, data: dict):
+        """Pošle příkaz zpět do extension (např. přepnout titulky, chat-notice).
+        Volatelné z libovolného vlákna — naplánuje se do WS event loopu."""
+        if not self._loop:
+            return
+        payload = json.dumps(data)
+
+        def _broadcast():
+            for ws in list(self._clients):
+                try:
+                    asyncio.create_task(ws.send(payload))
+                except Exception:
+                    pass
+
+        try:
+            self._loop.call_soon_threadsafe(_broadcast)
+        except Exception:
+            pass
 
     def start(self, *_args, **_kwargs):
         """Spustí WS server na pozadí. Argumenty se ignorují — main.py volá
@@ -79,7 +99,18 @@ class MeetCaptionsTranscriber:
             await self._stop_event.wait()
 
     async def _handle_client(self, websocket):
+        # Bezpečnost: přijmi jen připojení z rozšíření (chrome-extension://).
+        # Webstránka má Origin https://… → odmítneme (nemůže podstrčit titulky).
+        try:
+            origin = websocket.request.headers.get("Origin") or ""
+        except Exception:
+            origin = ""
+        if origin and not origin.startswith("chrome-extension://"):
+            print(f"[MEET-CAP] Odmítnuto spojení z cizího originu: {origin}")
+            await websocket.close()
+            return
         print("[MEET-CAP] Extension připojena")
+        self._clients.add(websocket)
         try:
             async for raw in websocket:
                 try:
@@ -107,4 +138,5 @@ class MeetCaptionsTranscriber:
         except websockets.exceptions.ConnectionClosed:
             pass
         finally:
+            self._clients.discard(websocket)
             print("[MEET-CAP] Extension odpojena")
