@@ -59,6 +59,7 @@ def _seed_config():
 
 
 import rumps  # noqa: E402
+from PyObjCTools import AppHelper  # noqa: E402
 from src import keychain  # noqa: E402
 from src import overlay  # noqa: E402
 from src.config import load_config  # noqa: E402
@@ -79,6 +80,10 @@ class MentholApp(rumps.App):
         cap = cfg.get("audio", {}).get("modes", {}).get("captions", {})
         self.meet_browser = cap.get("meet_app", "Brave Browser")
         self.open_after = bool(cfg.get("recording", {}).get("open_folder_after", False))
+        brief_cfg = cfg.get("brief", {}) or {}
+        self.brief_enabled = bool(brief_cfg.get("enabled", False))
+        self.brief_mode = brief_cfg.get("mode", "schuze")
+        self.brief_templates = brief_cfg.get("templates", {}) or {}
 
         self._build_menu()
 
@@ -157,6 +162,24 @@ class MentholApp(rumps.App):
         rec_menu.add(self.open_after_item)
         settings.add(rec_menu)
 
+        # Brief po schůzce
+        brief_menu = rumps.MenuItem("Brief po schůzce")
+        self.brief_toggle_item = rumps.MenuItem("Zapnout brief", callback=self.toggle_brief)
+        self.brief_toggle_item.state = 1 if self.brief_enabled else 0
+        brief_menu.add(self.brief_toggle_item)
+        brief_menu.add(rumps.separator)
+        self.brief_items = {}
+        for name, t in self.brief_templates.items():
+            it = rumps.MenuItem(t.get("popis", name), callback=self._brief_cb(name))
+            it.state = 1 if name == self.brief_mode else 0
+            self.brief_items[name] = it
+            brief_menu.add(it)
+        brief_menu.add(rumps.separator)
+        brief_menu.add(rumps.MenuItem("Upravit prompt šablony…", callback=self.edit_brief_prompt))
+        brief_menu.add(rumps.MenuItem("Přejmenovat šablonu…", callback=self.rename_brief))
+        brief_menu.add(rumps.MenuItem("Přidat šablonu…", callback=self.add_brief))
+        settings.add(brief_menu)
+
         # Zkratky (rada + překrýt titulky)
         self.hotkey_item = rumps.MenuItem(
             f"Zkratka pro radu: {self.hotkey_combo} (změnit…)", callback=self.set_hotkey
@@ -204,6 +227,7 @@ class MentholApp(rumps.App):
                 role=self.role,
                 on_suggestion=lambda t: overlay.show(t, 6.0, False),
                 overlay_func=lambda t: overlay.show(t, 4.0, False),
+                on_first_transcript=self._on_first_transcript,
             )
             self.assistant.start_services()
             self.running = True
@@ -343,6 +367,78 @@ class MentholApp(rumps.App):
         self.open_after_item.state = 1 if self.open_after else 0
         self._save_config({"recording": {"open_folder_after": self.open_after}})
 
+    def _brief_cb(self, name):
+        return lambda _: self.set_brief_mode(name)
+
+    def toggle_brief(self, _):
+        self.brief_enabled = not self.brief_enabled
+        self.brief_toggle_item.state = 1 if self.brief_enabled else 0
+        self._save_config({"brief": {"enabled": self.brief_enabled}})
+
+    def set_brief_mode(self, name):
+        self.brief_mode = name
+        for n, it in self.brief_items.items():
+            it.state = 1 if n == name else 0
+        self._save_config({"brief": {"mode": name}})
+
+    def edit_brief_prompt(self, _):
+        cfg = load_config(USER_CONFIG)
+        templates = cfg.setdefault("brief", {}).setdefault("templates", {})
+        t = templates.setdefault(self.brief_mode, {})
+        win = rumps.Window(
+            title=f"Prompt briefu: {t.get('popis', self.brief_mode)}",
+            message="Instrukce pro brief celé schůzky. Delší úpravy přes 'Upravit config.json'.",
+            default_text=t.get("prompt", ""),
+            ok="Uložit", cancel="Zrušit", dimensions=(460, 140),
+        )
+        resp = win.run()
+        if not resp.clicked:
+            return
+        t["prompt"] = resp.text
+        with open(USER_CONFIG, "w", encoding="utf-8") as f:
+            json.dump(cfg, f, indent=2, ensure_ascii=False)
+        rumps.notification("Menthol", "", f"Prompt briefu '{self.brief_mode}' uložen.")
+
+    def rename_brief(self, _):
+        cfg = load_config(USER_CONFIG)
+        templates = cfg.setdefault("brief", {}).setdefault("templates", {})
+        t = templates.setdefault(self.brief_mode, {})
+        win = rumps.Window(
+            title="Přejmenovat šablonu briefu", message="Zobrazovaný název:",
+            default_text=t.get("popis", self.brief_mode),
+            ok="Uložit", cancel="Zrušit", dimensions=(300, 24),
+        )
+        resp = win.run()
+        if not (resp.clicked and resp.text.strip()):
+            return
+        t["popis"] = resp.text.strip()
+        with open(USER_CONFIG, "w", encoding="utf-8") as f:
+            json.dump(cfg, f, indent=2, ensure_ascii=False)
+        if self.brief_mode in self.brief_items:
+            self.brief_items[self.brief_mode].title = resp.text.strip()
+
+    def add_brief(self, _):
+        win = rumps.Window(
+            title="Přidat šablonu briefu", message="Krátký název šablony:",
+            ok="Vytvořit", cancel="Zrušit", dimensions=(240, 24),
+        )
+        resp = win.run()
+        name = (resp.text or "").strip()
+        if not (resp.clicked and name):
+            return
+        cfg = load_config(USER_CONFIG)
+        templates = cfg.setdefault("brief", {}).setdefault("templates", {})
+        if name in templates:
+            rumps.alert("Menthol", "Šablona s tímto názvem už existuje.")
+            return
+        templates[name] = {
+            "popis": name,
+            "prompt": "Shrň schůzku z přepisu stručně, česky, v odrážkách.",
+        }
+        with open(USER_CONFIG, "w", encoding="utf-8") as f:
+            json.dump(cfg, f, indent=2, ensure_ascii=False)
+        rumps.alert("Menthol", f"Šablona '{name}' vytvořena. Restartuj Menthol, aby se objevila v menu.")
+
     def open_meet(self, _):
         cfg = load_config(USER_CONFIG)
         cap = cfg.get("audio", {}).get("modes", {}).get("captions", {})
@@ -455,7 +551,17 @@ class MentholApp(rumps.App):
     def _set_status(self, on):
         self.status_item.title = "● Poslouchám" if on else "● Zastaveno"
         self.toggle_item.title = "Zastavit poslech" if on else "Spustit poslech"
-        self.title = "🌿▶" if on else "🌿"
+        # Bílé kolečko = poslouchá, ale ještě nic nepřepsal; zelené nastaví
+        # _on_first_transcript po prvním zápisu. Vypnuto = jen 🌿.
+        self.title = "🌿⚪️" if on else "🌿"
+
+    def _on_first_transcript(self):
+        # Volá se z WS vlákna → změnu titulku marshaluj na hlavní vlákno.
+        AppHelper.callAfter(self._set_title_green)
+
+    def _set_title_green(self):
+        if self.running:
+            self.title = "🌿🟢"
 
     def quit_app(self, _):
         self.stop(final=False)

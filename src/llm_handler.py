@@ -146,6 +146,39 @@ Na co se mám teď zeptat nebo co říct?"""
 
         return f"(Chyba LLM: {self._extract_error_message(last_error)[:150]})"
 
+    def complete(self, system_prompt: str, user_message: str, max_tokens: int = 800) -> str:
+        """Jednorázové volání s vlastním system promptem (pro brief/shrnutí)."""
+        last_error = None
+        for entry in self.providers:
+            try:
+                if entry["provider"] == "gemini":
+                    url = f"{GEMINI_BASE_URL}/models/{entry['model']}:generateContent"
+                    resp = requests.post(
+                        url, params={"key": entry["api_key"]},
+                        json={
+                            "system_instruction": {"parts": [{"text": system_prompt}]},
+                            "contents": [{"role": "user", "parts": [{"text": user_message}]}],
+                            "generationConfig": {"maxOutputTokens": max_tokens},
+                        },
+                        timeout=30,
+                    )
+                    resp.raise_for_status()
+                    data = resp.json()
+                    return data["candidates"][0]["content"]["parts"][0]["text"].strip()
+                else:
+                    response = entry["client"].messages.create(
+                        model=entry["model"],
+                        max_tokens=max_tokens,
+                        system=system_prompt,
+                        messages=[{"role": "user", "content": user_message}],
+                    )
+                    return response.content[0].text.strip()
+            except Exception as e:
+                print(f"[LLM] complete {entry['provider']} selhal: {e}")
+                last_error = e
+                continue
+        return f"(Chyba LLM: {self._extract_error_message(last_error)[:150]})"
+
     def _gemini_request(self, entry: dict, user_message: str) -> str:
         """Zavolá Gemini generateContent REST endpoint (žádný SDK, jen requests)."""
         url = f"{GEMINI_BASE_URL}/models/{entry['model']}:generateContent"

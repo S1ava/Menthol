@@ -102,7 +102,7 @@ class RealtimeAssistant:
     def __init__(self, config_path: str = "config.json", mode: str = None,
                  monitor_device: str = None, role: str = None,
                  internal_speakers: list = None, on_suggestion=None,
-                 overlay_func=None):
+                 overlay_func=None, on_first_transcript=None):
         self.config = load_config(config_path) if os.path.exists(config_path) else get_default_config()
         self._monitor_device = monitor_device
         # Volitelný callback pro zobrazení nápovědy (menubar app → overlay).
@@ -398,6 +398,9 @@ class RealtimeAssistant:
             (self.config.get("transparency", {}) or {}).get("chat_notice", True)
         )
         self._chat_notice_sent = False
+        # Callback při prvním zapsaném přepisu (menubar → zelená ikona).
+        self.on_first_transcript = on_first_transcript
+        self._first_transcript_fired = False
 
         # State
         self._last_transcript = ""
@@ -515,6 +518,40 @@ class RealtimeAssistant:
         except Exception as e:
             print(f"[NOTICE] odeslání selhalo: {e}")
 
+    def _maybe_generate_brief(self, path: str):
+        """Po skončení volitelně vygeneruje brief celé schůzky a přidá ho na
+        konec souboru přepisu. Běží na pozadí (neblokuje ukončení)."""
+        brief_cfg = self.config.get("brief", {}) or {}
+        if not brief_cfg.get("enabled") or not self.llm or not path:
+            return
+        with self._transcript_lock:
+            full = "\n".join(self._full_transcript).strip()
+        if not full:
+            return
+        mode = brief_cfg.get("mode", "schuze")
+        templates = brief_cfg.get("templates", {}) or {}
+        default_prompt = (
+            "Vytvoř stručný zápis ze schůzky z přepisu. Sekce:\n"
+            "- Témata diskuse: hlavní náměty a problémy\n"
+            "- Učiněná rozhodnutí: konkrétní řešení a dohody\n"
+            "- Akční položky: úkoly s vlastníky a termíny\n"
+            "Česky, stručně, odrážkami."
+        )
+        prompt = (templates.get(mode) or {}).get("prompt") or default_prompt
+
+        def _worker():
+            try:
+                brief = self.llm.complete(prompt, full, max_tokens=900)
+                with open(path, "a", encoding="utf-8") as f:
+                    f.write("\n" + "=" * 60 + "\n📋 BRIEF SCHŮZKY\n" + "=" * 60 + "\n")
+                    f.write(brief.strip() + "\n")
+                print(f"📋 Brief uložen: {path}")
+            except Exception as e:
+                print(f"[BRIEF] selhalo: {e}")
+
+        print("📋 Generuji brief schůzky na pozadí…")
+        Thread(target=_worker, daemon=True).start()
+
     def _on_meta(self, title: str, code: str = None):
         """Callback z extension: název meetingu (titulek tabu) + kód z URL.
         Titulek má přednost; když z něj po očištění nic nezbude, použije se kód."""
@@ -534,8 +571,14 @@ class RealtimeAssistant:
         speaker: přebije self.speaker, když ho pošle zdroj sám (titulky Meet
         posílají jméno mluvčího přímo z UI — přesnější než statický config).
         """
-        # První přepis = pošli transparentní oznámení do chatu Meetu.
+        # První přepis = pošli transparentní oznámení do chatu Meetu + zelená ikona.
         self._maybe_send_chat_notice()
+        if self.on_first_transcript and not self._first_transcript_fired:
+            self._first_transcript_fired = True
+            try:
+                self.on_first_transcript()
+            except Exception as e:
+                print(f"[ICON] on_first_transcript selhal: {e}")
         effective_speaker = speaker if speaker is not None else self.speaker
         # Jméno mluvčího jde i do přepisu pro LLM — jinak model neví, kdo co
         # řekl, a v captions módu s víc mluvčími si domýšlí, že mluví klient.
@@ -815,6 +858,8 @@ class RealtimeAssistant:
                 self.transcript_logger.close(usage=usage_line)
             except Exception as e:
                 print(f"[STOP] Chyba při uzavírání přepisu: {e}")
+            # Volitelný brief celé schůzky (na pozadí, append do finálního souboru).
+            self._maybe_generate_brief(self.transcript_logger.path)
 
         if self.audio:
             try:

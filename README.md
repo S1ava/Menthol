@@ -101,6 +101,12 @@ Přepis se ukládá jako `meet_<datum_čas>_<název_schůzky>.txt` do
 
 ---
 
+## Náročnost (paměť)
+Lehká menubar appka. V liště (neposlouchá) ~60 MB, při poslechu a přepisu zhruba
+~80-120 MB (špička po prvním vyžádání rady, kdy se načte Claude SDK). Režim
+Gemini nebo „Nic neposílat" je lehčí. Pro srovnání: jeden tab prohlížeče bývá
+100-300 MB.
+
 ## Soukromí
 - API klíče jsou v chráněném souboru jen pro tvůj účet, nikdy ne v repu.
 - V režimu Claude/Gemini se text přepisu posílá do zvolené LLM služby pod tvým

@@ -60,6 +60,16 @@
   "transparency": {
     "chat_notice": true
   },
+  "brief": {
+    "enabled": false,
+    "mode": "schuze",
+    "templates": {
+      "schuze": {
+        "popis": "Schůze (témata / rozhodnutí / akce)",
+        "prompt": "Vytvoř stručný zápis ze schůzky z přepisu. Použij sekce:\n- Témata diskuse: hlavní náměty a problémy řešené během hovoru\n- Učiněná rozhodnutí: konkrétní řešení a dosažené dohody\n- Akční položky: konkrétní úkoly s přidělenými vlastníky a termíny\nPiš česky, stručně, odrážkami."
+      }
+    }
+  },
   "alerts": {
     "enabled": true,
     "priority": [
