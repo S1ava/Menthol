@@ -87,7 +87,9 @@ Přepis se ukládá jako `meet_<datum_čas>_<název_schůzky>.txt` do
    per-profil), nebo v tabu otevřeném dřív než rozšíření → dej **Cmd+R**.
 3. **Safari / samostatná Meet.app** — tam rozšíření neběží, použij normální okno
    Brave/Chrome.
-4. Log: `~/Library/Logs/Menthol/menthol.log`.
+4. **Po aktualizaci rozšíření** restartuj prohlížeč (ne jen „Reload") — MV3
+   service worker jinak může běžet ve staré verzi.
+5. Log: `~/Library/Logs/Menthol/menthol.log`.
 
 ---
 
