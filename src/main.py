@@ -539,13 +539,16 @@ class RealtimeAssistant:
         )
         prompt = (templates.get(mode) or {}).get("prompt") or default_prompt
 
+        # Brief jde do SAMOSTATNÉHO souboru: stejné jméno + suffix _brief.txt
+        brief_path = (path[:-4] if path.lower().endswith(".txt") else path) + "_brief.txt"
+
         def _worker():
             try:
                 brief = self.llm.complete(prompt, full, max_tokens=900)
-                with open(path, "a", encoding="utf-8") as f:
-                    f.write("\n" + "=" * 60 + "\n📋 BRIEF SCHŮZKY\n" + "=" * 60 + "\n")
+                with open(brief_path, "w", encoding="utf-8") as f:
+                    f.write("📋 BRIEF SCHŮZKY — Menthol\n" + "=" * 60 + "\n\n")
                     f.write(brief.strip() + "\n")
-                print(f"📋 Brief uložen: {path}")
+                print(f"📋 Brief uložen: {brief_path}")
             except Exception as e:
                 print(f"[BRIEF] selhalo: {e}")
 

@@ -66,7 +66,27 @@
     "templates": {
       "schuze": {
         "popis": "Schůze (témata / rozhodnutí / akce)",
-        "prompt": "Vytvoř stručný zápis ze schůzky z přepisu. Použij sekce:\n- Témata diskuse: hlavní náměty a problémy řešené během hovoru\n- Učiněná rozhodnutí: konkrétní řešení a dosažené dohody\n- Akční položky: konkrétní úkoly s přidělenými vlastníky a termíny\nPiš česky, stručně, odrážkami."
+        "prompt": "Jsi zapisovatel. Z přepisu schůzky vytvoř věcný zápis v češtině. Použij nadpisy:\n## Témata diskuse\nHlavní body a problémy, které se probíraly.\n## Rozhodnutí\nNa čem se účastníci shodli nebo co schválili.\n## Akční položky\nVe formátu: úkol — vlastník — termín (pokud zazněl).\nPiš odrážkami a konkrétně. Co v přepisu není, nevymýšlej."
+      },
+      "strucne": {
+        "popis": "Stručné shrnutí",
+        "prompt": "Shrň přepis do krátkého odstavce (3-5 vět) a pak do 3-5 klíčových bodů v odrážkách. Česky, věcně, bez vaty."
+      },
+      "obchod": {
+        "popis": "Obchodní hovor (pro CRM)",
+        "prompt": "Z přepisu obchodního hovoru vytvoř shrnutí do CRM. Použij nadpisy:\n## Potřeby a cíle zákazníka\n## Rozpočet a rozhodování\nKdo rozhoduje a v jakém čase.\n## Námitky a rizika\n## Zmíněná konkurence\n## Dohodnutý další krok\nČesky, odrážkami, jen to, co skutečně zaznělo."
+      },
+      "koucink": {
+        "popis": "Koučink / 1:1",
+        "prompt": "Z přepisu koučovacího nebo 1:1 rozhovoru vytvoř zápis. Použij nadpisy:\n## Hlavní témata\n## Uvědomění a posuny\n## Závazky a akční kroky klienta\n## Na co navázat příště\nČesky, odrážkami, drž se slov klienta."
+      },
+      "brainstorming": {
+        "popis": "Brainstorming",
+        "prompt": "Z přepisu brainstormingu vytvoř přehled. Použij nadpisy:\n## Řešený problém\n## Navržené nápady a směry\n## Kritéria pro rozhodnutí\n## Otevřené otázky a mezery\nČesky, odrážkami."
+      },
+      "vedeni": {
+        "popis": "Vedení / porada (manažerský souhrn)",
+        "prompt": "Z přepisu porady vytvoř manažerský souhrn. Použij nadpisy:\n## Shrnutí pro vedení\n3-4 věty.\n## Rozhodnutí\n## Rizika a čísla\n## Odpovědnosti a termíny\nČesky, stručně, konkrétně."
       }
     }
   },

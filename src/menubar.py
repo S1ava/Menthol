@@ -551,17 +551,17 @@ class MentholApp(rumps.App):
     def _set_status(self, on):
         self.status_item.title = "● Poslouchám" if on else "● Zastaveno"
         self.toggle_item.title = "Zastavit poslech" if on else "Spustit poslech"
-        # Bílé kolečko = poslouchá, ale ještě nic nepřepsal; zelené nastaví
-        # _on_first_transcript po prvním zápisu. Vypnuto = jen 🌿.
-        self.title = "🌿⚪️" if on else "🌿"
+        # Bílý ▶ = poslouchá, ale ještě nic nepřepsal; po prvním zápisu nastaví
+        # _on_first_transcript červené record kolečko. Vypnuto = jen 🌿.
+        self.title = "🌿▶" if on else "🌿"
 
     def _on_first_transcript(self):
         # Volá se z WS vlákna → změnu titulku marshaluj na hlavní vlákno.
-        AppHelper.callAfter(self._set_title_green)
+        AppHelper.callAfter(self._set_title_recording)
 
-    def _set_title_green(self):
+    def _set_title_recording(self):
         if self.running:
-            self.title = "🌿🟢"
+            self.title = "🌿🔴"
 
     def quit_app(self, _):
         self.stop(final=False)
