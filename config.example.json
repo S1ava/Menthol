@@ -5,13 +5,23 @@
     "gemini": ""
   },
   "ai": {
-    "_mode_options": ["anthropic", "gemini", "none"],
+    "_mode_options": [
+      "anthropic",
+      "gemini",
+      "none"
+    ],
     "mode": "anthropic"
   },
   "llm": {
     "priority": [
-      {"provider": "gemini", "model": "gemini-3.5-flash-lite"},
-      {"provider": "anthropic", "model": "claude-haiku-4-5-20251001"}
+      {
+        "provider": "gemini",
+        "model": "gemini-3.5-flash-lite"
+      },
+      {
+        "provider": "anthropic",
+        "model": "claude-haiku-4-5-20251001"
+      }
     ]
   },
   "internal_speakers": [],
@@ -65,48 +75,98 @@
     "mode": "schuze",
     "templates": {
       "schuze": {
-        "popis": "Schůze (témata / rozhodnutí / akce)",
+        "category": "Obecné",
+        "popis": "Schůze",
         "prompt": "Jsi zapisovatel. Z přepisu schůzky vytvoř věcný zápis v češtině. Použij nadpisy:\n## Témata diskuse\nHlavní body a problémy, které se probíraly.\n## Rozhodnutí\nNa čem se účastníci shodli nebo co schválili.\n## Akční položky\nVe formátu: úkol — vlastník — termín (pokud zazněl).\nPiš odrážkami a konkrétně. Co v přepisu není, nevymýšlej."
       },
       "strucne": {
+        "category": "Obecné",
         "popis": "Stručné shrnutí",
         "prompt": "Shrň přepis do krátkého odstavce (3-5 vět) a pak do 3-5 klíčových bodů v odrážkách. Česky, věcně, bez vaty."
       },
-      "obchod": {
-        "popis": "Obchod: shrnutí pro CRM",
-        "prompt": "Z přepisu obchodního hovoru vytvoř shrnutí do CRM. Použij nadpisy:\n## Potřeby a cíle zákazníka\n## Rozpočet a rozhodování\nKdo rozhoduje a v jakém čase.\n## Námitky a rizika\n## Zmíněná konkurence\n## Dohodnutý další krok\nČesky, odrážkami, jen to, co skutečně zaznělo."
-      },
-      "bant": {
-        "popis": "Obchod: BANT",
-        "prompt": "Z přepisu obchodního hovoru vyhodnoť kvalifikaci metodikou BANT. Použij nadpisy:\n## Budget — rozpočet\nKolik je zákazník ochoten investovat, finanční mantinely.\n## Authority — pravomoc\nKdo rozhoduje a kdo je do rozhodnutí zapojen.\n## Need — potřeba\nJaký problém řeší a jak je naléhavý.\n## Timeline — časový rámec\nKdy chce rozhodnout nebo nasadit řešení.\nČesky, odrážkami. Kde to nezaznělo, napiš, že to nezaznělo."
-      },
-      "meddic": {
-        "popis": "Obchod: MEDDIC",
-        "prompt": "Z přepisu obchodního hovoru vyhodnoť příležitost metodikou MEDDIC. Použij nadpisy:\n## Metrics — metriky\nMěřitelný přínos, který zákazník od řešení čeká.\n## Economic buyer — ekonomický kupující\nKdo drží rozpočet a finálně schvaluje.\n## Decision criteria — rozhodovací kritéria\nPodle čeho se bude rozhodovat.\n## Decision process — rozhodovací proces\nJak a v jakých krocích rozhodnutí proběhne.\n## Identify pain — bolest\nHlavní problém, který zákazník řeší.\n## Champion — interní zastánce\nKdo uvnitř řešení prosazuje.\nČesky, odrážkami. Kde to nezaznělo, napiš, že to nezaznělo."
-      },
-      "gpct": {
-        "popis": "Obchod: GPCT",
-        "prompt": "Z přepisu obchodního hovoru vytvoř kvalifikaci metodikou GPCT. Použij nadpisy:\n## Goals — cíle\nČeho chce zákazník dosáhnout (ideálně měřitelně).\n## Plans — plány\nJak toho chce dosáhnout dnes.\n## Challenges — výzvy\nCo mu v tom brání.\n## Timeline — časový rámec\nDokdy to chce vyřešit.\nČesky, odrážkami. Kde to nezaznělo, napiš, že to nezaznělo."
-      },
-      "koucink": {
-        "popis": "Koučink / 1:1",
-        "prompt": "Z přepisu koučovacího nebo 1:1 rozhovoru vytvoř zápis. Použij nadpisy:\n## Hlavní témata\n## Uvědomění a posuny\n## Závazky a akční kroky klienta\n## Na co navázat příště\nČesky, odrážkami, drž se slov klienta."
+      "vedeni": {
+        "category": "Obecné",
+        "popis": "Vedení / porada",
+        "prompt": "Z přepisu porady vytvoř manažerský souhrn. Použij nadpisy:\n## Shrnutí pro vedení\n3-4 věty.\n## Rozhodnutí\n## Rizika a čísla\n## Odpovědnosti a termíny\nČesky, stručně, konkrétně."
       },
       "brainstorming": {
+        "category": "Obecné",
         "popis": "Brainstorming",
         "prompt": "Z přepisu brainstormingu vytvoř přehled. Použij nadpisy:\n## Řešený problém\n## Navržené nápady a směry\n## Kritéria pro rozhodnutí\n## Otevřené otázky a mezery\nČesky, odrážkami."
       },
-      "vedeni": {
-        "popis": "Vedení / porada (manažerský souhrn)",
-        "prompt": "Z přepisu porady vytvoř manažerský souhrn. Použij nadpisy:\n## Shrnutí pro vedení\n3-4 věty.\n## Rozhodnutí\n## Rizika a čísla\n## Odpovědnosti a termíny\nČesky, stručně, konkrétně."
+      "kickoff": {
+        "category": "Obecné",
+        "popis": "Kickoff projektu",
+        "prompt": "Z přepisu úvodní (kickoff) schůzky k projektu vytvoř zápis. Použij nadpisy:\n## Cíl a rozsah projektu\n## Jak poznáme úspěch\n## Role a odpovědnosti\n## Rizika a otevřené otázky\n## Další kroky\nČesky, odrážkami."
+      },
+      "obchod": {
+        "category": "Obchod",
+        "popis": "Shrnutí pro CRM",
+        "prompt": "Z přepisu obchodního hovoru vytvoř shrnutí do CRM. Použij nadpisy:\n## Potřeby a cíle zákazníka\n## Rozpočet a rozhodování\nKdo rozhoduje a v jakém čase.\n## Námitky a rizika\n## Zmíněná konkurence\n## Dohodnutý další krok\nČesky, odrážkami, jen to, co skutečně zaznělo."
+      },
+      "bant": {
+        "category": "Obchod",
+        "popis": "BANT",
+        "prompt": "Z přepisu obchodního hovoru vyhodnoť kvalifikaci metodikou BANT. Použij nadpisy:\n## Budget — rozpočet\nKolik je zákazník ochoten investovat, finanční mantinely.\n## Authority — pravomoc\nKdo rozhoduje a kdo je do rozhodnutí zapojen.\n## Need — potřeba\nJaký problém řeší a jak je naléhavý.\n## Timeline — časový rámec\nKdy chce rozhodnout nebo nasadit řešení.\nČesky, odrážkami. Kde to nezaznělo, napiš, že to nezaznělo."
+      },
+      "meddic": {
+        "category": "Obchod",
+        "popis": "MEDDIC",
+        "prompt": "Z přepisu obchodního hovoru vyhodnoť příležitost metodikou MEDDIC. Použij nadpisy:\n## Metrics — metriky\nMěřitelný přínos, který zákazník čeká.\n## Economic buyer — ekonomický kupující\nKdo drží rozpočet a finálně schvaluje.\n## Decision criteria — rozhodovací kritéria\n## Decision process — rozhodovací proces\n## Identify pain — bolest\nHlavní problém, který řeší.\n## Champion — interní zastánce\nKdo uvnitř řešení prosazuje.\nČesky, odrážkami. Kde to nezaznělo, napiš, že to nezaznělo."
+      },
+      "gpct": {
+        "category": "Obchod",
+        "popis": "GPCT",
+        "prompt": "Z přepisu obchodního hovoru vytvoř kvalifikaci metodikou GPCT. Použij nadpisy:\n## Goals — cíle\nČeho chce zákazník dosáhnout (ideálně měřitelně).\n## Plans — plány\nJak toho chce dosáhnout dnes.\n## Challenges — výzvy\nCo mu v tom brání.\n## Timeline — časový rámec\nDokdy to chce vyřešit.\nČesky, odrážkami. Kde to nezaznělo, napiš, že to nezaznělo."
+      },
+      "spin": {
+        "category": "Obchod",
+        "popis": "SPIN",
+        "prompt": "Z přepisu obchodního hovoru vytvoř analýzu metodikou SPIN. Použij nadpisy:\n## Situation — situace\nSoučasný stav u zákazníka.\n## Problem — problém\nPotíže, které má.\n## Implication — důsledky\nCo mu problém způsobuje (náklady, rizika).\n## Need-payoff — přínos řešení\nJakou hodnotu by mu řešení přineslo.\nČesky, odrážkami. Kde to nezaznělo, napiš, že to nezaznělo."
+      },
+      "followup": {
+        "category": "Obchod",
+        "popis": "Follow-up po hovoru",
+        "prompt": "Z přepisu obchodního hovoru připrav podklad pro follow-up e-mail zákazníkovi. Použij nadpisy:\n## Na čem jsme se shodli\n## Co zákazník potřebuje nebo na co čeká\n## Co pošlu nebo připravím\n## Navržený termín dalšího kroku\nČesky, stručně, tónem profesionálního obchodníka."
+      },
+      "koucink": {
+        "category": "Koučink / HR",
+        "popis": "Koučink 1:1",
+        "prompt": "Z přepisu koučovacího nebo 1:1 rozhovoru vytvoř zápis. Použij nadpisy:\n## Hlavní témata\n## Uvědomění a posuny\n## Závazky a akční kroky klienta\n## Na co navázat příště\nČesky, odrážkami, drž se slov klienta."
+      },
+      "feedback": {
+        "category": "Koučink / HR",
+        "popis": "Zpětná vazba",
+        "prompt": "Z přepisu rozhovoru se zpětnou vazbou vytvoř zápis. Použij nadpisy:\n## Co fungovalo\n## Co zlepšit\n## Konkrétní příklady\n## Dohodnuté kroky a podpora\nČesky, věcně a konstruktivně."
+      },
+      "pohovor": {
+        "category": "Koučink / HR",
+        "popis": "Pracovní pohovor",
+        "prompt": "Z přepisu pracovního pohovoru vytvoř hodnoticí zápis. Použij nadpisy:\n## Role a kandidát\n## Zkušenosti a kompetence\n## Silné stránky\n## Rizika a otázky k dořešení\n## Doporučení (ano / spíš ano / ne) s odůvodněním\nČesky, odrážkami, drž se toho, co zaznělo."
+      },
+      "discovery": {
+        "category": "Produkt / konzultace",
+        "popis": "Discovery požadavků",
+        "prompt": "Z přepisu discovery hovoru k produktu nebo požadavkům vytvoř zápis. Použij nadpisy:\n## Problém za požadavkem\nCo uživatel skutečně řeší.\n## Dopad a priorita\n## Požadavky a akceptační kritéria\n## Omezení a závislosti\n## Otevřené otázky\nČesky, odrážkami."
+      },
+      "konzultace": {
+        "category": "Produkt / konzultace",
+        "popis": "Konzultační hovor",
+        "prompt": "Z přepisu konzultačního hovoru vytvoř zápis. Použij nadpisy:\n## Situace klienta\n## Doporučení\n## Zdůvodnění\n## Další kroky a kdo co udělá\nČesky, odrážkami."
       }
     }
   },
   "alerts": {
     "enabled": true,
     "priority": [
-      {"provider": "gemini", "model": "gemini-3.5-flash-lite"},
-      {"provider": "anthropic", "model": "claude-sonnet-5"}
+      {
+        "provider": "gemini",
+        "model": "gemini-3.5-flash-lite"
+      },
+      {
+        "provider": "anthropic",
+        "model": "claude-sonnet-5"
+      }
     ],
     "cooldown_seconds": 20,
     "notification_type": "overlay",

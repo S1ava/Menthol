@@ -168,12 +168,19 @@ class MentholApp(rumps.App):
         self.brief_toggle_item.state = 1 if self.brief_enabled else 0
         brief_menu.add(self.brief_toggle_item)
         brief_menu.add(rumps.separator)
+        # Dvě úrovně: kategorie → šablona (radio napříč kategoriemi).
         self.brief_items = {}
+        cat_menus = {}
         for name, t in self.brief_templates.items():
+            cat = t.get("category", "Ostatní")
+            if cat not in cat_menus:
+                cm = rumps.MenuItem(cat)
+                cat_menus[cat] = cm
+                brief_menu.add(cm)
             it = rumps.MenuItem(t.get("popis", name), callback=self._brief_cb(name))
             it.state = 1 if name == self.brief_mode else 0
             self.brief_items[name] = it
-            brief_menu.add(it)
+            cat_menus[cat].add(it)
         brief_menu.add(rumps.separator)
         brief_menu.add(rumps.MenuItem("Upravit prompt šablony…", callback=self.edit_brief_prompt))
         brief_menu.add(rumps.MenuItem("Přejmenovat šablonu…", callback=self.rename_brief))
@@ -210,7 +217,7 @@ class MentholApp(rumps.App):
         """Který klíč je potřeba pro aktuální AI režim (nebo None)."""
         return {"anthropic": "anthropic", "gemini": "gemini"}.get(self.ai_mode)
 
-    def start(self):
+    def start(self, open_meet=True):
         keychain.load_into_env()
         need = self._required_key()
         if need and not keychain.has_key(need):
@@ -229,7 +236,7 @@ class MentholApp(rumps.App):
                 overlay_func=lambda t: overlay.show(t, 4.0, False),
                 on_first_transcript=self._on_first_transcript,
             )
-            self.assistant.start_services()
+            self.assistant.start_services(open_meet=open_meet)
             self.running = True
             self._set_status(True)
         except Exception as e:
@@ -268,16 +275,20 @@ class MentholApp(rumps.App):
             self.open_recordings(None)
 
     def _restart_if_running(self):
+        # Restart kvůli změně nastavení (AI režim, zkratka) — Meet znovu neotvírej.
         if self.running:
             self.stop(final=False)
-            self.start()
+            self.start(open_meet=False)
 
     def set_role(self, name):
         self.role = name
         for n, it in self.role_items.items():
             it.state = 1 if n == name else 0
         self._save_config({"default_role": name})
-        self._restart_if_running()
+        # Role měníme ZA BĚHU (jen prompt rádce) — žádný restart, Meet se
+        # znovu neotevírá, přepis se nerozdělí.
+        if self.running and self.assistant:
+            self.assistant.set_role_live(name)
 
     def edit_role_prompt(self, _):
         cfg = load_config(USER_CONFIG)
@@ -432,6 +443,7 @@ class MentholApp(rumps.App):
             rumps.alert("Menthol", "Šablona s tímto názvem už existuje.")
             return
         templates[name] = {
+            "category": "Vlastní",
             "popis": name,
             "prompt": "Shrň schůzku z přepisu stručně, česky, v odrážkách.",
         }

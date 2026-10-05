@@ -495,6 +495,19 @@ class RealtimeAssistant:
             print(f"{cyan}│{reset} {highlight}{line}{reset}{pad} {cyan}│{reset}")
         print(bottom + "\n")
 
+    def set_role_live(self, role: str) -> bool:
+        """Změní roli rádce ZA BĚHU — jen vymění system prompt LLM, bez restartu
+        (nezavírá přepis, neotevírá znovu Meet, neposílá znovu chat-notice)."""
+        roles = self.config.get("roles", {})
+        if role not in roles:
+            return False
+        self.role = role
+        prompt = (roles.get(role) or {}).get("system_prompt")
+        if self.llm and prompt:
+            self.llm.system_prompt = prompt
+        print(f"🎭 Role změněna za běhu na '{role}'")
+        return True
+
     def toggle_captions(self):
         """Zkratka 'překrýt titulky' → řekni extension, ať titulky schová/ukáže."""
         try:
@@ -707,10 +720,11 @@ class RealtimeAssistant:
                 traceback.print_exc()
                 time.sleep(0.1)
 
-    def start_services(self):
+    def start_services(self, open_meet: bool = True):
         """Spustí všechny služby (Meet, hotkey, transcriber) BEZ blokující
         smyčky. Vhodné pro běh pod cizím runloopem (menubar app). CLI použije
-        run(), který navíc nainstaluje signal handlery a blokuje do Ctrl+C."""
+        run(), který navíc nainstaluje signal handlery a blokuje do Ctrl+C.
+        open_meet=False při restartu kvůli změně nastavení (ať znovu neotvírá Meet)."""
         print("🌿 Menthol — spouštím...")
         if self.llm:
             llm_chain_desc = " → ".join(f"{e['provider']}/{e['model']}" for e in self.llm.providers)
@@ -724,7 +738,7 @@ class RealtimeAssistant:
         # Captions mode: otevři Meet v NORMÁLNÍM Brave okně (ne PWA "app" okno —
         # to neinjektuje content script rozšíření, takže titulky nikdo nečte).
         # Jen dashboard, k hovoru se uživatel připojí sám ručně.
-        if self.meet_app_path:
+        if self.meet_app_path and open_meet:
             try:
                 cmd = ["open", "-a", self.meet_app_path]
                 if self.meet_url:
