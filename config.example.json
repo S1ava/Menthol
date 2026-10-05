@@ -73,8 +73,20 @@
         "prompt": "Shrň přepis do krátkého odstavce (3-5 vět) a pak do 3-5 klíčových bodů v odrážkách. Česky, věcně, bez vaty."
       },
       "obchod": {
-        "popis": "Obchodní hovor (pro CRM)",
+        "popis": "Obchod: shrnutí pro CRM",
         "prompt": "Z přepisu obchodního hovoru vytvoř shrnutí do CRM. Použij nadpisy:\n## Potřeby a cíle zákazníka\n## Rozpočet a rozhodování\nKdo rozhoduje a v jakém čase.\n## Námitky a rizika\n## Zmíněná konkurence\n## Dohodnutý další krok\nČesky, odrážkami, jen to, co skutečně zaznělo."
+      },
+      "bant": {
+        "popis": "Obchod: BANT",
+        "prompt": "Z přepisu obchodního hovoru vyhodnoť kvalifikaci metodikou BANT. Použij nadpisy:\n## Budget — rozpočet\nKolik je zákazník ochoten investovat, finanční mantinely.\n## Authority — pravomoc\nKdo rozhoduje a kdo je do rozhodnutí zapojen.\n## Need — potřeba\nJaký problém řeší a jak je naléhavý.\n## Timeline — časový rámec\nKdy chce rozhodnout nebo nasadit řešení.\nČesky, odrážkami. Kde to nezaznělo, napiš, že to nezaznělo."
+      },
+      "meddic": {
+        "popis": "Obchod: MEDDIC",
+        "prompt": "Z přepisu obchodního hovoru vyhodnoť příležitost metodikou MEDDIC. Použij nadpisy:\n## Metrics — metriky\nMěřitelný přínos, který zákazník od řešení čeká.\n## Economic buyer — ekonomický kupující\nKdo drží rozpočet a finálně schvaluje.\n## Decision criteria — rozhodovací kritéria\nPodle čeho se bude rozhodovat.\n## Decision process — rozhodovací proces\nJak a v jakých krocích rozhodnutí proběhne.\n## Identify pain — bolest\nHlavní problém, který zákazník řeší.\n## Champion — interní zastánce\nKdo uvnitř řešení prosazuje.\nČesky, odrážkami. Kde to nezaznělo, napiš, že to nezaznělo."
+      },
+      "gpct": {
+        "popis": "Obchod: GPCT",
+        "prompt": "Z přepisu obchodního hovoru vytvoř kvalifikaci metodikou GPCT. Použij nadpisy:\n## Goals — cíle\nČeho chce zákazník dosáhnout (ideálně měřitelně).\n## Plans — plány\nJak toho chce dosáhnout dnes.\n## Challenges — výzvy\nCo mu v tom brání.\n## Timeline — časový rámec\nDokdy to chce vyřešit.\nČesky, odrážkami. Kde to nezaznělo, napiš, že to nezaznělo."
       },
       "koucink": {
         "popis": "Koučink / 1:1",
