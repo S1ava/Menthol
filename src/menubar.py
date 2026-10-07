@@ -84,6 +84,8 @@ class MentholApp(rumps.App):
         self.brief_enabled = bool(brief_cfg.get("enabled", False))
         self.brief_mode = brief_cfg.get("mode", "schuze")
         self.brief_templates = brief_cfg.get("templates", {}) or {}
+        self.issues_url = cfg.get("issues_url", "https://github.com/S1ava/Menthol/issues/new?template=bug_report.md")
+        self.support_email = (cfg.get("support_email") or "").strip()
 
         self._build_menu()
 
@@ -106,6 +108,7 @@ class MentholApp(rumps.App):
             self.meet_item,
             None,
             self._settings_menu(),
+            rumps.MenuItem("Nahlásit chybu…", callback=self.open_report),
             None,
             rumps.MenuItem("Ukončit Menthol", callback=self.quit_app),
         ]
@@ -460,6 +463,28 @@ class MentholApp(rumps.App):
             subprocess.Popen(["open", "-a", app] + ([url] if url else []))
         except Exception as e:
             rumps.alert("Menthol", f"Nepodařilo se otevřít Meet ({app}): {e}")
+
+    def open_report(self, _):
+        """Nahlásit chybu: otevře GitHub issue (nebo e-mail, když je nastaven
+        support_email) a ukáže log ve Finderu k přiložení."""
+        log = os.path.join(LOG_DIR, "menthol.log")
+        try:
+            if self.support_email:
+                import urllib.parse
+                subj = urllib.parse.quote("Menthol — chyba")
+                body = urllib.parse.quote(
+                    "Co se stalo:\n\nKroky:\n\nMenthol verze:\nmacOS:\n\n"
+                    "(Přilož prosím ~/Library/Logs/Menthol/menthol.log)"
+                )
+                subprocess.Popen(
+                    ["open", "mailto:%s?subject=%s&body=%s" % (self.support_email, subj, body)]
+                )
+            else:
+                subprocess.Popen(["open", self.issues_url])
+            if os.path.exists(log):
+                subprocess.Popen(["open", "-R", log])  # ukáže log ve Finderu
+        except Exception as e:
+            rumps.alert("Menthol", "Nepodařilo se otevřít hlášení: %s" % e)
 
     def _recordings_dir(self):
         cfg = load_config(USER_CONFIG)

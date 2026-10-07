@@ -101,6 +101,14 @@ Přepis se ukládá jako `meet_<datum_čas>_<název_schůzky>.txt` do
 
 ---
 
+## Jak nahlásit chybu / navrhnout úpravu
+- Nejjednodušeji: v liště **🌿 → Nahlásit chybu…** — otevře předvyplněné hlášení
+  a ukáže ti **log** ve Finderu (ten k hlášení přilož, je v něm vidět, co se dělo).
+- Nebo přímo na GitHubu: **Issues → New issue** (Nahlásit chybu / Návrh úpravy).
+  Vyžaduje bezplatný GitHub účet.
+- Vždy prosím přilož log `~/Library/Logs/Menthol/menthol.log` a verzi (z Release,
+  ze kterého jsi stahoval).
+
 ## Náročnost (paměť)
 Lehká menubar appka. V liště (neposlouchá) ~60 MB, při poslechu a přepisu zhruba
 ~80-120 MB (špička po prvním vyžádání rady, kdy se načte Claude SDK). Režim

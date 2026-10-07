@@ -67,6 +67,8 @@
     "captions_toggle": "cmd+shift+j"
   },
   "download_url": "https://github.com/S1ava/Menthol/releases/latest",
+  "issues_url": "https://github.com/S1ava/Menthol/issues/new?template=bug_report.md",
+  "support_email": "",
   "transparency": {
     "chat_notice": true
   },
