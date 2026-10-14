@@ -30,22 +30,29 @@ mikrofon, žádný audio driver ani žádné macOS oprávnění navíc.
 
 ## Instalace krok za krokem
 
-### 1. Stáhni projekt
+### 1. Stáhni projekt (doporučeně přes ZIP)
+Nahoře na GitHubu klikni na zelené **Code → Download ZIP**. Stažený soubor
+rozbal (dvojklik) — vznikne složka `Menthol-main`.
+
+> **Nepoužívej `git clone`, pokud nejsi vývojář.** Příkaz `git` na čistém Macu
+> vyvolá dialog „install developer tools", který k ničemu nepotřebuješ.
+> ZIP je jednodušší a rychlejší.
+
+Pak v aplikaci **Terminál** přejdi do té složky, např.:
 ```bash
-git clone https://github.com/S1ava/Menthol.git
-cd Menthol
+cd ~/Downloads/Menthol-main
 ```
-Nebo ZIP: **Code → Download ZIP**, rozbal, a v Terminálu se do složky přesuň.
 
 ### 2. Spusť instalaci
 ```bash
 ./install.sh
 ```
-Script se tě na vše zeptá a vysvětlí, proč to chce. Postaví appku do
-`~/Applications/Menthol.app` (nebo `/Applications`). Nepotřebuje sudo.
+Script se tě na vše zeptá a vysvětlí, proč to chce. Jen odklikáváš **Enter**;
+pokud ti chybí Python, jednou zadáš **heslo** k Macu (instalace Pythonu).
+Nakonec postaví appku do `~/Applications/Menthol.app` (nebo `/Applications`).
 
-> Pokud by během instalace někdy vyskočilo okno **„install developer tools"**,
-> dej **Zrušit** — Menthol ho nepotřebuje a skript si Python obstará sám.
+> Kdyby přesto někdy vyskočilo okno **„install developer tools"**, dej
+> **Zrušit** — Menthol ho nepotřebuje a skript si Python obstará sám.
 
 ### 3. Načti rozšíření do prohlížeče (čte titulky)
 1. V Brave/Chrome otevři `brave://extensions` (resp. `chrome://extensions`).
