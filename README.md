@@ -18,8 +18,10 @@ mikrofon, žádný audio driver ani žádné macOS oprávnění navíc.
 1. **Mac** s macOS 12 nebo novějším.
 2. **Brave** nebo **Google Chrome** (titulky čte rozšíření, které běží jen v
    těchto prohlížečích — Safari ani samostatná „Meet.app" nefungují).
-3. **Python 3** (na Macu často už je; jinak `brew install python` nebo
-   z <https://www.python.org/downloads/>).
+3. **Python 3.11 nebo novější.** Verze z „Command Line Tools" (3.9), kterou má
+   macOS někdy předinstalovanou, **nestačí** — instalace se zastaví a navede tě.
+   Nejjednodušší je stáhnout „macOS 64-bit universal2 installer" z
+   <https://www.python.org/downloads/macos/> a proklikat `.pkg` (bez příkazů).
 4. **API klíč** pro AI nápovědu — Anthropic (Claude) nebo Google (Gemini).
    Anthropic: <https://console.anthropic.com> → API Keys.
    **Nebo vůbec žádný** — v Nastavení lze zvolit „Nic neposílat": Menthol pak
@@ -42,6 +44,12 @@ Nebo ZIP: **Code → Download ZIP**, rozbal, a v Terminálu se do složky přesu
 ```
 Script se tě na vše zeptá a vysvětlí, proč to chce. Postaví appku do
 `~/Applications/Menthol.app` (nebo `/Applications`). Nepotřebuje sudo.
+
+> **Chyba `No matching distribution found for websockets`** (nebo „requires a
+> different python version") = máš starý Python 3.9. Nainstaluj 3.11+ z
+> <https://www.python.org/downloads/macos/> a spusť `./install.sh` znovu.
+> Pokud během instalace vyskočí okno „install developer tools", můžeš dát
+> **Zrušit** — Menthol ho nepotřebuje.
 
 ### 3. Načti rozšíření do prohlížeče (čte titulky)
 1. V Brave/Chrome otevři `brave://extensions` (resp. `chrome://extensions`).

@@ -28,12 +28,36 @@ INTRO
 echo
 ask "Pokračovat? [Enter = ano, Ctrl+C = zrušit]"; read -r _
 
-# --- 1. Python ---
-if ! command -v python3 >/dev/null 2>&1; then
-  err "Nenašel jsem python3. Nainstaluj ho z https://www.python.org/downloads/ nebo 'brew install python' a spusť skript znovu."
+# --- 1. Python 3.11+ ---
+# POZN: Python 3.9 z "Command Line Tools" nestačí — websockets 17 i pyobjc
+# vyžadují 3.11+. Zkusíme najít vhodný interpreter, jinak navedeme na python.org.
+MIN_MINOR=11
+pick_python() {
+  for cand in python3.13 python3.12 python3.11 python3; do
+    command -v "$cand" >/dev/null 2>&1 || continue
+    ver="$("$cand" -c 'import sys;print("%d.%d"%sys.version_info[:2])' 2>/dev/null)" || continue
+    major="${ver%%.*}"; minor="${ver##*.}"
+    if [ "$major" = "3" ] && [ "$minor" -ge "$MIN_MINOR" ]; then echo "$cand"; return 0; fi
+  done
+  return 1
+}
+if ! PY="$(pick_python)"; then
+  found="žádný"
+  command -v python3 >/dev/null 2>&1 && found="$(python3 -c 'import sys;print("%d.%d.%d"%sys.version_info[:3])' 2>/dev/null || echo '?')"
+  err "Menthol potřebuje Python 3.${MIN_MINOR} nebo novější (našel jsem: $found)."
+  cat <<'PYHELP'
+
+Nainstaluj Python z python.org (bez příkazů, jen klikání):
+  1) Otevři  https://www.python.org/downloads/macos/
+  2) Stáhni "macOS 64-bit universal2 installer" (nejnovější 3.x).
+  3) Dvakrát klikni na stažený .pkg a proklikej instalaci (Pokračovat → Instalovat).
+  4) Zavři a znovu otevři Terminál a spusť  ./install.sh  znovu.
+
+Pozn.: Python z "Command Line Tools" (3.9) nestačí — ten Menthol odmítne.
+PYHELP
   exit 1
 fi
-ok "python3: $(python3 -c 'import sys;print("%d.%d.%d"%sys.version_info[:3])')"
+ok "python3: $("$PY" -c 'import sys;print("%d.%d.%d"%sys.version_info[:3])')  ($PY)"
 
 # --- 2. kam instalovat ---
 DEST_DEFAULT="$HOME/Applications"
@@ -51,7 +75,7 @@ echo
 say "Teď vytvořím build venv a stáhnu Python knihovny (pár MB, chvíli to trvá)."
 ask "Spustit? [Enter]"; read -r _
 rm -rf "$BUILDVENV"
-python3 -m venv "$BUILDVENV"
+"$PY" -m venv "$BUILDVENV"
 "$BUILDVENV/bin/pip" install --upgrade pip wheel >/dev/null
 "$BUILDVENV/bin/pip" install -r "$SCRIPT_DIR/requirements.txt" py2app
 ok "Závislosti nainstalované"
