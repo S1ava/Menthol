@@ -18,9 +18,9 @@ mikrofon, žádný audio driver ani žádné macOS oprávnění navíc.
 1. **Mac** s macOS 12 nebo novějším.
 2. **Brave** nebo **Google Chrome** (titulky čte rozšíření, které běží jen v
    těchto prohlížečích — Safari ani samostatná „Meet.app" nefungují).
-3. **Nic dalšího instalovat nemusíš.** Potřebný Python 3.11+ si `install.sh`
-   v případě potřeby **stáhne a nainstaluje sám** z python.org (jednou si řekne
-   o heslo). Starý Python 3.9 z „Command Line Tools" totiž nestačí.
+3. **Nic dalšího instalovat nemusíš.** Menthol potřebuje Python **3.9+**; když
+   ho `install.sh` nenajde, **stáhne a nainstaluje si ho sám** z python.org
+   (jednou si řekne o heslo).
 4. **API klíč** pro AI nápovědu — Anthropic (Claude) nebo Google (Gemini).
    Anthropic: <https://console.anthropic.com> → API Keys.
    **Nebo vůbec žádný** — v Nastavení lze zvolit „Nic neposílat": Menthol pak

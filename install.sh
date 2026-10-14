@@ -29,12 +29,13 @@ INTRO
 echo
 ask "Pokračovat? [Enter = ano, Ctrl+C = zrušit]"; read -r _
 
-# --- 1. Python 3.11+ (když chybí, nainstalujeme ho sami) ---
-# POZN: Python 3.9 z "Command Line Tools" nestačí (websockets 17, pyobjc).
-# Záměrně NESPOUŠTÍME holý `python3` — to je Apple stub, který na čistém Macu
-# vyvolá dialog "install developer tools". Hledáme jen reálné interprety 3.11+.
-MIN_MINOR=11
-PY_INSTALL_VER=3.12.8   # oficiální python.org build, když žádný vhodný není
+# --- 1. Python 3.9+ (když chybí, nainstalujeme ho sami) ---
+# Skutečné minimum je 3.9: websockets>=14 (nová .request API) i pyobjc 11 jedou
+# na 3.9 a zdroják nemá žádnou 3.10+ syntaxi. Záměrně NESPOUŠTÍME holý `python3`
+# — to je Apple stub, který na čistém Macu vyvolá dialog "install developer tools".
+# Hledáme jen reálné interprety.
+MIN_MINOR=9
+PY_INSTALL_VER=3.12.8   # co nainstalujeme, když žádný vhodný Python není
 
 pick_python() {
   local cands=() c p ver
@@ -44,7 +45,7 @@ pick_python() {
   for c in /opt/homebrew/bin/python3.1* /usr/local/bin/python3.1*; do
     [ -x "$c" ] && cands+=("$c")
   done
-  for p in python3.13 python3.12 python3.11; do
+  for p in python3.13 python3.12 python3.11 python3.10 python3.9; do
     c="$(command -v "$p" 2>/dev/null)" && cands+=("$c")
   done
   [ ${#cands[@]} -eq 0 ] && return 1
