@@ -23,39 +23,58 @@ poradí, co říct. Tenhle skript:
   1) vytvoří izolované build prostředí (Python venv) a stáhne knihovny,
   2) postaví Menthol.app a nainstaluje ji do Aplikací,
   3) vysvětlí 3 ruční kroky (rozšíření do prohlížeče, první spuštění, klíč).
-Nepotřebuje sudo ani žádná macOS oprávnění navíc.
+Žádná macOS oprávnění navíc (mikrofon apod.) nepotřebuje. Pokud na Macu chybí
+novější Python, skript ho sám stáhne z python.org a jednou si řekne o heslo.
 INTRO
 echo
 ask "Pokračovat? [Enter = ano, Ctrl+C = zrušit]"; read -r _
 
-# --- 1. Python 3.11+ ---
-# POZN: Python 3.9 z "Command Line Tools" nestačí — websockets 17 i pyobjc
-# vyžadují 3.11+. Zkusíme najít vhodný interpreter, jinak navedeme na python.org.
+# --- 1. Python 3.11+ (když chybí, nainstalujeme ho sami) ---
+# POZN: Python 3.9 z "Command Line Tools" nestačí (websockets 17, pyobjc).
+# Záměrně NESPOUŠTÍME holý `python3` — to je Apple stub, který na čistém Macu
+# vyvolá dialog "install developer tools". Hledáme jen reálné interprety 3.11+.
 MIN_MINOR=11
+PY_INSTALL_VER=3.12.8   # oficiální python.org build, když žádný vhodný není
+
 pick_python() {
-  for cand in python3.13 python3.12 python3.11 python3; do
-    command -v "$cand" >/dev/null 2>&1 || continue
-    ver="$("$cand" -c 'import sys;print("%d.%d"%sys.version_info[:2])' 2>/dev/null)" || continue
-    major="${ver%%.*}"; minor="${ver##*.}"
-    if [ "$major" = "3" ] && [ "$minor" -ge "$MIN_MINOR" ]; then echo "$cand"; return 0; fi
+  local cands=() c p ver
+  for c in /Library/Frameworks/Python.framework/Versions/3.*/bin/python3; do
+    [ -x "$c" ] && cands+=("$c")
+  done
+  for c in /opt/homebrew/bin/python3.1* /usr/local/bin/python3.1*; do
+    [ -x "$c" ] && cands+=("$c")
+  done
+  for p in python3.13 python3.12 python3.11; do
+    c="$(command -v "$p" 2>/dev/null)" && cands+=("$c")
+  done
+  [ ${#cands[@]} -eq 0 ] && return 1
+  for c in "${cands[@]}"; do
+    ver="$("$c" -c 'import sys;print("%d.%d"%sys.version_info[:2])' 2>/dev/null)" || continue
+    [ "${ver%%.*}" = "3" ] && [ "${ver##*.}" -ge "$MIN_MINOR" ] && { echo "$c"; return 0; }
   done
   return 1
 }
+
+install_python() {
+  local pkg="python-${PY_INSTALL_VER}-macos11.pkg"
+  local url="https://www.python.org/ftp/python/${PY_INSTALL_VER}/${pkg}"
+  local tmp="/tmp/$pkg"
+  echo
+  say "Nenašel jsem Python 3.${MIN_MINOR}+. Stáhnu a nainstaluju oficiální Python ${PY_INSTALL_VER} z python.org."
+  echo "   • Stahuje se jen z python.org (HTTPS). Nic se nikam neodesílá."
+  echo "   • macOS instalátor si řekne o tvé přihlašovací heslo (sudo) — to je v pořádku."
+  ask "Nainstalovat Python? [Enter = ano, Ctrl+C = zrušit]"; read -r _
+  say "Stahuji Python…"
+  curl -fL --progress-bar -o "$tmp" "$url" || { err "Stažení Pythonu selhalo (zkontroluj internet)."; exit 1; }
+  say "Instaluji Python — počkej, než to doběhne, okno nezavírej…"
+  sudo installer -pkg "$tmp" -target /   # synchronní: pokračuje se až po dokončení
+  rm -f "$tmp"
+  ok "Python nainstalován"
+}
+
 if ! PY="$(pick_python)"; then
-  found="žádný"
-  command -v python3 >/dev/null 2>&1 && found="$(python3 -c 'import sys;print("%d.%d.%d"%sys.version_info[:3])' 2>/dev/null || echo '?')"
-  err "Menthol potřebuje Python 3.${MIN_MINOR} nebo novější (našel jsem: $found)."
-  cat <<'PYHELP'
-
-Nainstaluj Python z python.org (bez příkazů, jen klikání):
-  1) Otevři  https://www.python.org/downloads/macos/
-  2) Stáhni "macOS 64-bit universal2 installer" (nejnovější 3.x).
-  3) Dvakrát klikni na stažený .pkg a proklikej instalaci (Pokračovat → Instalovat).
-  4) Zavři a znovu otevři Terminál a spusť  ./install.sh  znovu.
-
-Pozn.: Python z "Command Line Tools" (3.9) nestačí — ten Menthol odmítne.
-PYHELP
-  exit 1
+  install_python
+  PY="$(pick_python)" || { err "Python se nepodařilo zprovoznit. Zavři a otevři Terminál a spusť skript znovu."; exit 1; }
 fi
 ok "python3: $("$PY" -c 'import sys;print("%d.%d.%d"%sys.version_info[:3])')  ($PY)"
 
